@@ -1,0 +1,119 @@
+﻿@using MessageBoard1.Models
+@model MyUser
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ChangeUserInfo</title>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#SwitchBtn").html("修改密码");
+            $("#ChangePassword").hide();
+            $("#ChangeInfo").show();
+
+            //设置切换按钮点击事件，隐藏一个div，显示另一个div
+            $("#SwitchBtn").click(function () {
+                if ($("#SwitchBtn").html() == "修改密码") {
+                    $("#SwitchBtn").html("修改信息");
+                    $("#ChangePassword").show();
+                    $("#ChangeInfo").hide();
+                } else {
+                    $("#SwitchBtn").html("修改密码");
+                    $("#ChangePassword").hide();
+                    $("#ChangeInfo").show();
+                }
+            });
+
+            //验证表单
+            $("#ChangeInfoForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var phoneNum = $("#PhoneNum").val();
+
+                if (phoneNum == "") {
+                    errorInfo += "请输入手机号码 \n";
+                } else if (!(/^1[34578]\d{9}$/.test(phoneNum))) {   //用正则表达式检查手机号格式
+                    errorInfo += "请输入正确的手机号码 \n";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+
+            //验证表单
+            $("#ChangePasswordForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var oldPassword = $("#OldPassword").val();
+                var newPassword = $("#NewPassword").val();
+
+                if (oldPassword == "") {
+                    errorInfo += "请输入原密码 \n";
+                } else if (password.length >= 20) {
+                    errorInfo += "原密码不会超过20个字符！";
+                }
+
+                if (newPassword == "") {
+                    errorInfo += "请输入新密码 \n";
+                } else if (password.length >= 20) {
+                    errorInfo += "新密码不能超过20个字符！";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+        });
+       
+    </script>
+</head>
+<body>
+    @Html.Partial("UserHeader")
+    @Html.Partial("UserCenterHeader")
+    <div style="text-align:center">
+        <h3>@ViewData["Message"]</h3>
+        <div style="text-align:center; display:flex; flex-direction:column; align-items:center" id="ChangeInfo">
+            <h3>修改用户信息</h3>
+            <form action="/MyUserCenter/ChangeInfo" method="post" id="ChangeInfoForm">
+                <table>
+                    <tr>
+                        <td>手机号码：</td>
+                        <td>
+                            <input type="text" name="PhoneNum" id="PhoneNum" placeholder="请输入您的手机号码" value="@Model.PhoneNum"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="submit" value="修改" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div style="text-align:center; display:flex; flex-direction:column; align-items:center" id="ChangePassword">
+            <h3>修改密码</h3>
+            <form action="/MyUserCenter/ChangePassword" method="post" id="ChagePasswordForm">
+                <table>
+                    <tr>
+                        <td>原密码：</td>
+                        <td><input type="password" name="OldPassword" id="OldPassword" placeholder="请输入原密码" /></td>
+                    </tr>
+                    <tr>
+                        <td>新密码：</td>
+                        <td><input type="password" name="NewPassword" id="NewPassword" placeholder="请输入新密码" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="submit" value="修改" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <button id="SwitchBtn" style="margin-top: 50px">修改密码</button>
+    </div>
+</body>
+</html>

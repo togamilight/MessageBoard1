@@ -1,0 +1,96 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>SignUp</title>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //验证表单
+            $("#SignUpForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var username = $("#Username").val();
+                var password = $("#Password").val();
+                var phoneNum = $("#PhoneNum").val();
+                if (username == "") {
+                    errorInfo += "请输入用户名 \n";
+                } else if (username.length >= 20) {
+                    errorInfo += "用户名不能超过20个字符 \n";
+                }
+
+                if (password == "") {
+                    errorInfo += "请输入密码 \n";
+                } else if (password.length >= 20) {
+                    errorInfo += "密码不能超过20个字符 \n";
+                }
+
+                if(phoneNum == "") {
+                    errorInfo += "请输入手机号码 \n";
+                }else if ( !(/^1[34578]\d{9}$/.test(phoneNum) ) ) {   //用正则表达式检查手机号格式
+                    errorInfo += "请输入正确的手机号码 \n";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }else {
+                    //用ajax将用户名返回服务器，检验数据库是否存在同名用户
+                    //在其它项都输入无误时才检验
+                    var data = {
+                        Username : username
+                    }
+                    var isUnique = true;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/MyUser/CheckUsername',
+                        data: data,
+                        async: false,   //取消异步，改为同步
+                        success: function(r){
+                            isUnique = r.isUnique;
+                        }
+                    });
+                    if(isUnique == false){
+                        errorInfo += "该用户名已被使用 \n";
+                        alert(errorInfo);
+                        e.preventDefault(); //取消事件的默认动作，即取消提交
+                    }
+                }
+            });
+        });
+        
+    </script>
+</head>
+<body>
+    @Html.Partial("UserHeader")
+    <div style="text-align:center; display:flex; flex-direction:column; align-items:center"> 
+        <h3>用户注册</h3>
+            <form action="/MyUser/DoSignUp" method="post" id="SignUpForm">
+                <table>
+                    <tr>
+                        <td>用户名：</td>
+                        <td><input type="text" name="Username" id="Username" placeholder="请输入用户名" /></td>
+                    </tr>
+                    <tr>
+                        <td>密码：</td>
+                        <td><input type="password" name="Password" id="Password" placeholder="请输入密码" /></td>
+                    </tr>
+                    <tr>
+                        <td>手机号码：</td>
+                        <td><input type="text" name="PhoneNum" id="PhoneNum" placeholder="请输入您的手机号码" /></td>
+                    </tr>
+                    <tr>
+                        <td><input type="submit" value="注册" /></td>
+                        <td><input type="reset" value="重置" /></td>
+                    </tr>
+                </table>
+            </form>
+        
+    </div>
+</body>
+</html>
