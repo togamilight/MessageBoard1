@@ -10,12 +10,6 @@ namespace MessageBoard1.Controllers
 {
     public class MyUserController : Controller
     {
-        // GET: MyUser
-        public ActionResult Index()
-        {
-            return View();
-        }
-
         //注册页面
         public ActionResult SignUp() {
             //已经登录时不能注册
@@ -57,7 +51,7 @@ namespace MessageBoard1.Controllers
             }else {
                 //登录成功，信息写进Session
                 Session["AccountStatus"] = MyAccountStatus.User;
-                Session["Username"] = user.Username;
+                Session["AccountName"] = user.Username;
                 return RedirectToAction("Index", "MyHome");
             }
         }
@@ -65,7 +59,7 @@ namespace MessageBoard1.Controllers
         public ActionResult Logout() {
             //注销，修改Session中的信息
             Session["AccountStatus"] = MyAccountStatus.None;
-            Session["Username"] = "";
+            Session["AccountName"] = "";
 
             return RedirectToAction("Login", new { message = "注销成功" });
         }

@@ -37,6 +37,10 @@ namespace MessageBoard1.DataAccessLayer {
             return line;
         }
 
+        internal bool CheckAdmin(Admin admin) {
+            throw new NotImplementedException();
+        }
+
         //判断用户名是否被使用
         public bool CheckUsername(string Username) {
             var conn = GetConnection();

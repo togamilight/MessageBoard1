@@ -1,0 +1,66 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //验证表单
+            $("#LoginForm").submit(function (e) {
+
+                var errorInfo = "";     //记录错误信息
+                var adminName = $("#AdminName").val();
+                var password = $("#Password").val();
+
+                if (adminName == "") {
+                    errorInfo += "请输入用户名 \n";
+                } else if (adminName.length >= 20) {
+                    errorInfo += "用户名不会超过20个字符！";
+                }
+
+                if (password == "") {
+                    errorInfo += "请输入密码 \n";
+                } else if (password.length >= 20) {
+                    errorInfo += "密码不会超过20个字符！";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("UserHeader")
+    <div style="text-align:center; display:flex; flex-direction:column; align-items:center">
+        <h3>@ViewData["Message"]</h3>
+        <h3>管理员登录</h3>
+        <form action="/MyAdmin/DoLogin" method="post" id="LoginForm">
+            <table>
+                <tr>
+                    <td>用户名：</td>
+                    <td><input type="text" name="AdminName" id="AdminName" placeholder="请输入用户名" /></td>
+                </tr>
+                <tr>
+                    <td>密码：</td>
+                    <td><input type="password" name="Password" id="Password" placeholder="请输入密码" /></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="登录" /></td>
+                    <td><input type="reset" value="重置" /></td>
+                </tr>
+            </table>
+        </form>
+
+    </div>
+</body>
+</html>

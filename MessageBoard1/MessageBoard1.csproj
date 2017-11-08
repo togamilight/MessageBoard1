@@ -198,6 +198,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\MyAdminController.cs" />
     <Compile Include="Controllers\MyHomeController.cs" />
     <Compile Include="Controllers\MyUserCenterController.cs" />
     <Compile Include="Controllers\MyUserController.cs" />
@@ -206,6 +207,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Admin.cs" />
     <Compile Include="Models\MyAccountStatus.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -280,6 +282,8 @@
     <Content Include="Views\MyUser\Login.cshtml" />
     <Content Include="Views\Shared\UserCenterHeader.cshtml" />
     <Content Include="Views\MyUserCenter\ChangeUserInfo.cshtml" />
+    <Content Include="Views\Shared\AdminHeader.cshtml" />
+    <Content Include="Views\MyAdmin\Login.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

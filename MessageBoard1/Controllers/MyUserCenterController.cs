@@ -20,20 +20,20 @@ namespace MessageBoard1.Controllers
 
         public ActionResult ChangeUserInfo(string message = "") {
             var dataAcc = new DataAccess();
-            MyUser user = dataAcc.GetUserInfo((string)Session["Username"]);
+            MyUser user = dataAcc.GetUserInfo((string)Session["AccountName"]);
             ViewData["Message"] = message;
             return View("ChangeUserInfo", user);
         }
 
         public ActionResult ChangeInfo(MyUser user) {
-            user.Username = (string)Session["UserName"];
+            user.Username = (string)Session["AccountName"];
             var dataAcc = new DataAccess();
             dataAcc.ChangeUserInfo(user);
             return RedirectToAction("ChangeUserInfo", new { message = "修改用户信息成功！" });
         }
 
         public ActionResult ChangePassword(string OldPassword, string NewPassword) {
-            string username = (string)Session["UserName"];
+            string username = (string)Session["AccountName"];
             MyUser user = new MyUser() { Username = username, Password = OldPassword };
             //确认原密码正确性
             var dataAcc = new DataAccess();
