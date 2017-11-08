@@ -206,6 +206,7 @@
     <Compile Include="Controllers\MyUserController.cs" />
     <Compile Include="Controllers\MyUserManageController.cs" />
     <Compile Include="DataAccessLayer\DataAccess.cs" />
+    <Compile Include="Filter\AdminFilter.cs" />
     <Compile Include="Filter\UserFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

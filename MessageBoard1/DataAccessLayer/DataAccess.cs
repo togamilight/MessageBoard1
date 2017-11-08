@@ -29,7 +29,7 @@ namespace MessageBoard1.DataAccessLayer {
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = user.Password;
             cmd.Parameters.Add("@PhoneNum", SqlDbType.VarChar).Value = user.PhoneNum;
-            cmd.Parameters.Add("@SignDate", SqlDbType.VarChar).Value = DateTime.Now.Date;   //获取当前日期
+            cmd.Parameters.Add("@SignDate", SqlDbType.Date).Value = DateTime.Now.Date;   //获取当前日期
             int line = cmd.ExecuteNonQuery();
 
             conn.Close();  
@@ -221,6 +221,7 @@ namespace MessageBoard1.DataAccessLayer {
             return users;
         }
 
+        //查询所有用户信息，组成List
         public List<MyUser> GetAllUserList() {
             var conn = GetConnection();
             conn.Open();
@@ -235,6 +236,39 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Close();
 
             return users;
+        }
+
+        public int DeleteUser(int id) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //根据id删除用户
+            string cmdText = "delete from MyUser where Id=@Id;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+        }
+
+        //管理员版本的修改用户信息(可修改用户名，密码和手机号码)
+        public int ChangeUserInfoByAdmin(MyUser user) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //修改
+            string cmdText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
+            cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = user.Password;
+            cmd.Parameters.Add("@PhoneNum", SqlDbType.VarChar).Value = user.PhoneNum;
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+            return line;
         }
     }
 }

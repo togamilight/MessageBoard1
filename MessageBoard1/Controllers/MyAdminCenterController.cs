@@ -1,4 +1,5 @@
 ﻿using MessageBoard1.DataAccessLayer;
+using MessageBoard1.Filter;
 using MessageBoard1.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Web.Mvc;
 
 namespace MessageBoard1.Controllers
 {
+    [AdminFilter]
     public class MyAdminCenterController : Controller
     {
         public ActionResult ChangeAdminInfo(string message = "") {

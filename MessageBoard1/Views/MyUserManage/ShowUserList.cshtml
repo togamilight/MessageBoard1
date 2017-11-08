@@ -10,19 +10,138 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>ShowUserList</title>
+    <style type="text/css">
+        #UserListDiv table, #UserListDiv tr, #UserListDiv  td, #UserListDiv  th{
+            padding:0;
+            margin:0;
+            border:1px solid gray;
+        }
+        #UserListDiv table{
+            margin: 0 auto;
+            border-collapse:collapse;
+            
+        }
+        #UserListDiv table th, #UserListDiv table td{
+            text-align: center;
+            padding: 5px 10px;
+        }
+        #UserListDiv table tr:nth-child(odd){       /*奇数行，偶数行为even*/
+            background: #ccc
+        }
+    </style>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var oldUsername = "";       //用于存储原用户名
+
+            //显示用户列表，隐藏编辑块
+            $("#UserListDiv").show();
+            $("#EditDiv").hide();
+
+            $(".DeleteBtn").click(function () {
+                if (confirm("确定删除该用户吗？")) {
+                    //从点击的按钮的那行获取id，跳转到删除用户的Ation，用get方式传递id
+                    var id = $(this).parent().siblings(".IdTd").text();
+                    location.href = "/MyUserManage/DeleteUser?id=" + id;
+                }
+            });
+
+            $(".EditBtn").click(function () {
+                //从点击的按钮的那行收集数据填入表单的Input框中
+                var id = $(this).parent().siblings(".IdTd").text();
+                var username = $(this).parent().siblings(".UsernameTd").text();
+                var password = $(this).parent().siblings(".PasswordTd").text();
+                var phoneNum = $(this).parent().siblings(".PhoneNumTd").text();
+                var signDate = $(this).parent().siblings(".SignDateTd").text();
+
+                $("#Id").val(id);
+                $("#Username").val(username);
+                $("#Password").val(password);
+                $("#PhoneNum").val(phoneNum);
+                $("#SignDate").val(signDate);
+
+                oldUsername = username; //将原用户名保存起来用于表单验证
+
+                //隐藏用户列表，显示编辑块
+                $("#UserListDiv").hide();
+                $("#EditDiv").show();
+            });
+
+            $("#CancelBtn").click(function () {
+                $("#UserListDiv").show();
+                $("#EditDiv").hide();
+            });
+
+            //验证表单
+            $("#EditForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var username = $("#Username").val();
+                var password = $("#Password").val();
+                var phoneNum = $("#PhoneNum").val();
+                if (username == "") {
+                    errorInfo += "请输入用户名 \n";
+                } else if (username.length >= 20) {
+                    errorInfo += "用户名不能超过20个字符 \n";
+                } else if (username.indexOf(" ") != -1) {
+                    errorInfo += "用户名不能含有空格 \n";
+                }
+
+                if (password == "") {
+                    errorInfo += "请输入密码 \n";
+                } else if (password.length >= 20) {
+                    errorInfo += "密码不能超过20个字符 \n";
+                } else if (password.indexOf(" ") != -1) {
+                    errorInfo += "密码不能含有空格 \n";
+                }
+
+                if (phoneNum == "") {
+                    errorInfo += "请输入手机号码 \n";
+                } else if (!(/^1[34578]\d{9}$/.test(phoneNum))) {   //用正则表达式检查手机号格式
+                    errorInfo += "请输入正确的手机号码 \n";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                } else if(oldUsername != username){ //当更改了用户名时
+                    //用ajax将用户名返回服务器，检验数据库是否存在同名用户
+                    //在其它项都输入无误时才检验
+                    var data = {
+                        Username: username
+                    }
+                    var isUnique = true;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/MyUser/CheckUsername',
+                        data: data,
+                        async: false,   //取消异步，改为同步
+                        success: function (r) {
+                            isUnique = r.isUnique;
+                        }
+                    });
+                    if (isUnique == false) {
+                        errorInfo += "该用户名已被使用 \n";
+                        alert(errorInfo);
+                        e.preventDefault(); //取消事件的默认动作，即取消提交
+                    }
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     @Html.Partial("AdminHeader")
     <div style="text-align:center"> 
-        <h3>@ViewData["Message"]</h3>
-        <div id="UserListDiv" style="text-align:center;">
+        <div id="UserListDiv" style="text-align:center">
+            <h3>@ViewData["Message"]</h3>
             <table id="UserListTable">
                 <tr>
                     <th>用户id</th>
                     <th>用户名</th>
                     <th>密码</th>
                     <th>手机号码</th>
-                    <th>关注时间</th>
+                    <th>注册日期</th>
                     <th>删除</th>
                     <th>编辑</th>
                     <th>查看留言</th>
@@ -33,13 +152,46 @@
                         <td class="UsernameTd">@user.Username</td>
                         <td class="PasswordTd">@user.Password</td>
                         <td class="PhoneNumTd">@user.PhoneNum</td>
-                        <td class="DateTd">@user.SignDate.ToString("yyyy/MM/dd")</td>
+                        <td class="SignDateTd">@user.SignDate.ToString("yyyy/MM/dd")</td>
                         <td><button class="DeleteBtn">删除</button></td>
                         <td><button class="EditBtn">编辑</button></td>
                         <td><button class="LookMessageBtn">查看留言</button></td>
                     </tr>
                 }
             </table>
+        </div>
+
+        <div id="EditDiv" style="text-align:center; display:flex; flex-direction:column; align-items:center">
+            <h3>修改用户信息</h3>
+            <form action="/MyUserManage/ChangeUserInfo" method="post" id="EditForm">
+                <table>
+                    <tr>
+                        <td>用户Id：</td>
+                        <td><input type="text" readonly name="Id" id="Id" /></td>
+                    </tr>
+                    <tr>
+                        <td>用户名：</td>
+                        <td><input type="text" name="Username" id="Username" placeholder="请输入用户名" /></td>
+                    </tr>
+                    <tr>
+                        <td>密码：</td>
+                        <td><input type="text" name="Password" id="Password" placeholder="请输入密码" /></td>
+                    </tr>
+                    <tr>
+                        <td>手机号码：</td>
+                        <td><input type="text" name="PhoneNum" id="PhoneNum" placeholder="请输入手机号码" /></td>
+                    </tr>
+                    <tr>
+                        <td>注册日期：</td>
+                        <td><input type="text" name="SignDate" id="SignDate" readonly /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="submit" value="修改" style="margin-top: 20px"/></td>
+                    </tr>
+                </table>
+            </form>
+            <button id="CancelBtn" style="margin-top: 20px">取消</button>
+
         </div>
     </div>
 </body>
