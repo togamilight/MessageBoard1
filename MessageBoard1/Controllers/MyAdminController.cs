@@ -27,10 +27,18 @@ namespace MessageBoard1.Controllers
             }
             else {
                 //登录成功，信息写进Session
-                Session["AccountStatus"] = MyAccountStatus.User;
+                Session["AccountStatus"] = MyAccountStatus.Admin;
                 Session["AccountName"] = admin.AdminName;
-                return RedirectToAction("Index", "MyHome");
+                return RedirectToAction("Index", "MyBack");
             }
+        }
+
+        public ActionResult Logout() {
+            //注销，修改Session中的信息
+            Session["AccountStatus"] = MyAccountStatus.None;
+            Session["AccountName"] = "";
+
+            return RedirectToAction("Login", new { message = "注销成功" });
         }
     }
 }

@@ -1,0 +1,70 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ChangeAdminInfo</title>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //验证表单
+            $("#ChangePasswordForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var oldPassword = $("#OldPassword").val();
+                var newPassword = $("#NewPassword").val();
+
+                if (oldPassword == "") {
+                    errorInfo += "请输入原密码 \n";
+                } else if (oldPassword.length >= 20) {
+                    errorInfo += "原密码不会超过20个字符！";
+                } else if (oldPassword.indexOf(" ") != -1) {
+                    errorInfo += "原密码不会含有空格 \n";
+                }
+
+                if (newPassword == "") {
+                    errorInfo += "请输入新密码 \n";
+                } else if (newPassword.length >= 20) {
+                    errorInfo += "新密码不能超过20个字符！";
+                } else if (newPassword.indexOf(" ") != -1) {
+                    errorInfo += "新密码不会含有空格 \n";
+                }
+
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("AdminHeader")
+    @Html.Partial("AdminCenterHeader")
+    <div style="text-align:center"> 
+        <h3>@ViewData["Message"]</h3>
+        <div style="text-align:center; display:flex; flex-direction:column; align-items:center" id="ChangePassword">
+            <h3>修改密码</h3>
+            <form action="/MyAdminCenter/ChangePassword" method="post" id="ChagePasswordForm">
+                <table>
+                    <tr>
+                        <td>原密码：</td>
+                        <td><input type="password" name="OldPassword" id="OldPassword" placeholder="请输入原密码" /></td>
+                    </tr>
+                    <tr>
+                        <td>新密码：</td>
+                        <td><input type="password" name="NewPassword" id="NewPassword" placeholder="请输入新密码" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="submit" value="修改" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

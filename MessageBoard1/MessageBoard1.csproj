@@ -198,10 +198,13 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\MyAdminCenterController.cs" />
     <Compile Include="Controllers\MyAdminController.cs" />
+    <Compile Include="Controllers\MyBackController.cs" />
     <Compile Include="Controllers\MyHomeController.cs" />
     <Compile Include="Controllers\MyUserCenterController.cs" />
     <Compile Include="Controllers\MyUserController.cs" />
+    <Compile Include="Controllers\MyUserManageController.cs" />
     <Compile Include="DataAccessLayer\DataAccess.cs" />
     <Compile Include="Filter\UserFilter.cs" />
     <Compile Include="Global.asax.cs">
@@ -284,6 +287,11 @@
     <Content Include="Views\MyUserCenter\ChangeUserInfo.cshtml" />
     <Content Include="Views\Shared\AdminHeader.cshtml" />
     <Content Include="Views\MyAdmin\Login.cshtml" />
+    <Content Include="Views\MyBack\Index.cshtml" />
+    <Content Include="Views\Shared\AdminCenterHeader.cshtml" />
+    <Content Include="Views\MyAdminCenter\ChangeAdminInfo.cshtml" />
+    <Content Include="Views\MyAdminCenter\SignUp.cshtml" />
+    <Content Include="Views\MyUserManage\ShowUserList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
