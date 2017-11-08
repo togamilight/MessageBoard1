@@ -24,7 +24,7 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Open();
 
             //往数据库中新增用户
-            string cmdText = "insert into MyUser(Username,Password,PhoneNum,SignDate) values (@Username, @Password, @PhoneNum, @SignDate);";
+            string cmdText = "insert into MyUser(Username,Password,PhoneNum,SignDate) values (@Username, @Password, @PhoneNum, @SignDate)";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = user.Password;
@@ -37,13 +37,17 @@ namespace MessageBoard1.DataAccessLayer {
             return line;
         }
 
+        internal bool CheckAdmin(Admin admin) {
+            throw new NotImplementedException();
+        }
+
         //判断用户名是否被使用
         public bool CheckUsername(string Username) {
             var conn = GetConnection();
             conn.Open();
 
             //查询是否存在同名用户
-            string cmdText = "select Id from MyUser where Username = @Username;";
+            string cmdText = "select Id from MyUser where Username = @Username";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = Username;
             SqlDataReader reader = cmd.ExecuteReader();
@@ -61,7 +65,7 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Open();
 
             //查询是否存在该用户
-            string cmdText = "select Id from MyUser where Username = @Username and Password = @Password;";
+            string cmdText = "select Id from MyUser where Username = @Username and Password = @Password";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = user.Password;
@@ -80,7 +84,7 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Open();
 
             //根据用户名查询信息
-            string cmdText = "select PhoneNum from MyUser where Username = @Username;";
+            string cmdText = "select PhoneNum from MyUser where Username = @Username";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = username;
             SqlDataReader reader = cmd.ExecuteReader();
@@ -102,7 +106,7 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Open();
 
             //修改
-            string cmdText = "update MyUser set PhoneNum = @PhoneNum where Username = @Username;";
+            string cmdText = "update MyUser set PhoneNum = @PhoneNum where Username = @Username";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
             cmd.Parameters.Add("@PhoneNum", SqlDbType.VarChar).Value = user.PhoneNum;
@@ -113,12 +117,12 @@ namespace MessageBoard1.DataAccessLayer {
         }
 
         //修改用户密码
-        public int ChangeUserPassword(MyUser user) {
+        public int ChangePassword(MyUser user) {
             var conn = GetConnection();
             conn.Open();
 
             //修改
-            string cmdText = "update MyUser set Password = @Password where Username = @Username;";
+            string cmdText = "update MyUser set Password = @Password where Username = @Username";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = user.Password;
@@ -126,115 +130,6 @@ namespace MessageBoard1.DataAccessLayer {
 
             conn.Close();
             return line;
-        }
-
-        //判断管理员的用户名密码是否正确
-        public bool CheckAdmin(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询是否存在该管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName and Password = @Password;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.VarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = admin.Password;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool result = reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return result;
-        }
-
-        //修改管理员密码
-        public int ChangeAdminPassword(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //修改
-            string cmdText = "update Admin set Password = @Password where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.VarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-            return line;
-        }
-
-        //新增管理员
-        public int SaveAdmin(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //往数据库中新增管理员
-            string cmdText = "insert into Admin(AdminName,Password) values (@AdminName, @Password);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.VarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
-        }
-
-        //判断用户名是否被使用
-        public bool CheckAdminName(string AdminName) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询是否存在同名管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.VarChar).Value = AdminName;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool isUnique = !reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return isUnique;
-        }
-
-        //从reader中读取User数据组成List
-        public List<MyUser> GetUserList(SqlDataReader reader) {
-            List<MyUser> users = new List<MyUser>();
-            //先获取每个属性的列序号
-            int c1 = reader.GetOrdinal("Id");
-            int c2 = reader.GetOrdinal("Username");
-            int c3 = reader.GetOrdinal("Password");
-            int c4 = reader.GetOrdinal("PhoneNum");
-            int c5 = reader.GetOrdinal("SignDate");
-            //获取属性生成MyUser对象，加入List
-            while (reader.Read()) {
-                MyUser user = new MyUser() {
-                    Id = (int)reader[c1],
-                    Username = (string)reader[c2],
-                    Password = (string)reader[c3],
-                    PhoneNum = (string)reader[c4],
-                    SignDate = (DateTime)reader[c5]
-                };
-                users.Add(user);
-            }
-            return users;
-        }
-
-        public List<MyUser> GetAllUserList() {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询所有MyUser
-            string cmdText = "select * from MyUser;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var users = GetUserList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return users;
         }
     }
 }

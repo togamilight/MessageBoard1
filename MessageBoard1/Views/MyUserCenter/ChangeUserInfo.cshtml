@@ -55,18 +55,14 @@
 
                 if (oldPassword == "") {
                     errorInfo += "请输入原密码 \n";
-                } else if (oldPassword.length >= 20) {
+                } else if (password.length >= 20) {
                     errorInfo += "原密码不会超过20个字符！";
-                } else if (oldPassword.indexOf(" ") != -1) {
-                    errorInfo += "原密码不会含有空格 \n";
                 }
 
                 if (newPassword == "") {
                     errorInfo += "请输入新密码 \n";
-                } else if (newPassword.length >= 20) {
+                } else if (password.length >= 20) {
                     errorInfo += "新密码不能超过20个字符！";
-                } else if (newPassword.indexOf(" ") != -1) {
-                    errorInfo += "新密码不能含有空格 \n";
                 }
 
                 if (errorInfo != "") {

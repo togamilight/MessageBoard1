@@ -23,16 +23,12 @@
                     errorInfo += "请输入用户名 \n";
                 } else if (adminName.length >= 20) {
                     errorInfo += "用户名不会超过20个字符！";
-                } else if (adminName.indexOf(" ") != -1) {
-                    errorInfo += "用户名不会含有空格 \n";
                 }
 
                 if (password == "") {
                     errorInfo += "请输入密码 \n";
                 } else if (password.length >= 20) {
                     errorInfo += "密码不会超过20个字符！";
-                } else if (password.indexOf(" ") != -1) {
-                    errorInfo += "密码不会含有空格 \n";
                 }
 
                 if (errorInfo != "") {
@@ -44,7 +40,7 @@
     </script>
 </head>
 <body>
-    @Html.Partial("AdminHeader")
+    @Html.Partial("UserHeader")
     <div style="text-align:center; display:flex; flex-direction:column; align-items:center">
         <h3>@ViewData["Message"]</h3>
         <h3>管理员登录</h3>

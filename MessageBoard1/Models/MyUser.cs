@@ -9,7 +9,7 @@ namespace MessageBoard1.Models {
         public string Username { get; set; }
         public string Password { get; set; }
         public string PhoneNum { get; set; }
-        public DateTime SignDate { get; set; }
+        public DateTime Date { get; set; }
         public int NewReply { get; set; }
     }
 }
