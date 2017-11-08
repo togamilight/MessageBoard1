@@ -23,12 +23,16 @@
                     errorInfo += "请输入用户名 \n";
                 } else if (username.length >= 20) {
                     errorInfo += "用户名不会超过20个字符！";
+                } else if (username.indexOf(" ") != -1) {
+                    errorInfo += "用户名不会含有空格 \n";
                 }
 
                 if (password == "") {
                     errorInfo += "请输入密码 \n";
                 } else if (password.length >= 20) {
                     errorInfo += "密码不会超过20个字符！";
+                } else if (password.indexOf(" ") != -1) {
+                    errorInfo += "密码不会含有空格 \n";
                 }
 
                 if (errorInfo != "") {

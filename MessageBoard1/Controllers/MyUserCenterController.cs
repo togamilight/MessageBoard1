@@ -39,7 +39,7 @@ namespace MessageBoard1.Controllers
             var dataAcc = new DataAccess();
             if (dataAcc.CheckUser(user)) {
                 user.Password = NewPassword;
-                dataAcc.ChangePassword(user);
+                dataAcc.ChangeUserPassword(user);
                 return RedirectToAction("ChangeUserInfo", new { message = "修改密码成功！" });
             }
             else {
