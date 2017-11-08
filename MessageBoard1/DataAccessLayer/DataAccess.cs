@@ -60,7 +60,7 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询是否存在该用户
+            //查询是否存在该用户名和密码
             string cmdText = "select Id from MyUser where Username = @Username and Password = @Password;";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
@@ -101,7 +101,7 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改
+            //修改（手机号码）
             string cmdText = "update MyUser set PhoneNum = @PhoneNum where Username = @Username;";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.VarChar).Value = user.Username;
@@ -238,6 +238,7 @@ namespace MessageBoard1.DataAccessLayer {
             return users;
         }
 
+        //删除用户
         public int DeleteUser(int id) {
             var conn = GetConnection();
             conn.Open();
