@@ -39,5 +39,21 @@ namespace MessageBoard1.Controllers
             dataAcc.ChangeUserInfoByAdmin(user);
             return GetAllUserList();
         }
+
+        [HttpPost]
+        public ActionResult SearchUsers(string KeyWord) {
+            if(KeyWord == "" || KeyWord == null) {
+                return GetAllUserList();
+            }
+            DataAccess dataAcc = new DataAccess();
+            List<MyUser> users = dataAcc.SearchUserList(KeyWord);
+            string message;
+            if(users.Count == 0) {
+                message = "找不到相关用户！";
+            }else {
+                message = "搜索结果";
+            }
+            return ShowUserList(users, message);
+        }
     }
 }

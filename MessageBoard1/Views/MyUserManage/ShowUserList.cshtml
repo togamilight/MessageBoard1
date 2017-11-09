@@ -127,12 +127,36 @@
                     }
                 }
             });
+
+            //验证表单
+            $("#SearchUserForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var keyWord = $("#KeyWord").val();
+                //if (keyWord == "") {
+                //    errorInfo += "请输入关键字 \n";
+                //} 
+                if (keyWord.length >= 20) {
+                    errorInfo += "关键字不能超过20个字符 \n";
+                } else if (keyWord.indexOf(" ") != -1) {
+                    errorInfo += "关键字不能含有空格 \n";
+                }
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
         });
     </script>
 </head>
 <body>
     @Html.Partial("AdminHeader")
     <div style="text-align:center"> 
+        <div style="text-align:right; margin-top:20px; margin-right:30px">
+            <form action="/MyUserManage/SearchUsers" method="post" id="SearchUserForm">
+                <input type="text" name="KeyWord" id="KeyWord" placeholder="请输入用户名的关键字"/>
+                <input type="submit" value="搜索用户"/>
+            </form>
+        </div>
         <div id="UserListDiv" style="text-align:center">
             <h3>@ViewData["Message"]</h3>
             <table id="UserListTable">

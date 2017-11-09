@@ -238,6 +238,22 @@ namespace MessageBoard1.DataAccessLayer {
             return users;
         }
 
+        public List<MyUser> SearchUserList(string keyWord) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //根据关键词查询用户查询
+            string cmdText = "select * from MyUser where Username like '%" + keyWord + "%';" ;
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var users = GetUserList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return users;
+        }
+
         //删除用户
         public int DeleteUser(int id) {
             var conn = GetConnection();
