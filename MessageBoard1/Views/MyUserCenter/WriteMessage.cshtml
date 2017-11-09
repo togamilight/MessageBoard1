@@ -1,0 +1,50 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>WriteMessage</title>
+    <link href="~/css/global.css" rel="stylesheet" type="text/css"/>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //验证表单
+            $("#MsgForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var title = $("#Title").val();
+                var content = $("#Content").val();
+
+                if (/^\s*$/.test(title)) { //判断字符串是否全是空格或为空
+                    errorInfo += "标题不能为空\n";
+                }
+                if (/^\s*$/.test(content)) {   //判断字符串是否全是空格或为空
+                    errorInfo += "内容不能为空\n";
+                }
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("UserHeader")
+    @Html.Partial("UserCenterHeader")
+    <div style="text-align:center"> 
+        <h3>编写留言</h3>
+        <div class="MsgDiv">
+            <form style="width: 100%;" action="/MyUserCenter/DoWriteMessage" method="post" id="MsgForm">
+                <input type="text" name="Title" id="Title" placeholder="请输入留言标题" maxlength="50"/>
+                <textarea rows="12" name="Content" id="Content" maxlength="500" placeholder="请输入留言内容"></textarea>
+                <input class="ConfirmBtn" type="submit" value="发表" />
+            </form>
+        </div>
+    </div>
+</body>
+</html>

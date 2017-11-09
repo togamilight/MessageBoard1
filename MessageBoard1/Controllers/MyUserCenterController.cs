@@ -46,5 +46,38 @@ namespace MessageBoard1.Controllers
                 return RedirectToAction("ChangeUserInfo", new { message = "原密码错误，修改密码失败" });
             }
         }
+
+        public ActionResult WriteMessage() {
+            return View("WriteMessage");
+        }
+
+        public ActionResult DoWriteMessage(Message msg) {
+            msg.Username = (string)Session["AccountName"];
+            DataAccess dataAcc = new DataAccess();
+            dataAcc.SaveMessage(msg);
+            return RedirectToAction("GetHistoryMessage");
+        }
+
+        public ActionResult GetHistoryMessage() {
+            string username = (string)Session["AccountName"];
+            DataAccess dataAcc = new DataAccess();
+            List<Message> msgs = dataAcc.GetUserMsgTitleList(username);
+            return View("GetHistoryMessage", msgs);
+        }
+
+        public ActionResult GetMessage(int MsgId) {
+            DataAccess dataAcc = new DataAccess();
+            Message msg = dataAcc.GetMessage(MsgId);
+            if (msg.IsPublic) {
+                return View("LookMessage");
+            }
+            return View("EditMessage");
+        }
+
+        public ActionResult DeleteMessage(int MsgId) {
+            DataAccess dataAcc = new DataAccess();
+            dataAcc.DeleteMessage(MsgId);
+            return RedirectToAction("GetHistoryMessage");
+        }
     }
 }

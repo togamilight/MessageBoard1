@@ -1,0 +1,69 @@
+﻿@using MessageBoard1.Models
+@model List<Message>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>GetHistoryMesssage</title>
+    <link href="~/css/global.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".DeleteBtn").click(function () {
+                if (confirm("确定删除该留言吗？")) {
+                    //从点击的按钮的那行获取MessagId，跳转到删除留言的Ation，用get方式传递MessageId
+                    var msgId = $(this).parent().siblings(".MsgId").text();
+                    location.href = "/MyUserCenter/DeleteMessage?MsgId=" + msgId;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("UserHeader")
+    @Html.Partial("UserCenterHeader")
+    <div style="text-align:center"> 
+        <div>
+            <h4>未公开</h4>
+            @{
+                int i = 0;
+            }
+            @for (; i < Model.Count; i++) {
+                if (Model[i].IsPublic) {
+                    break;
+                }
+                <div class="MsgTitleDiv">
+                    <span class="MsgId">@Model[i].Id</span>
+                    <a class="Title" href="/MyUserCenter/GetMessage?Id=@Model[i].Id">@Model[i].Title</a>
+                    <span>
+                        <div class="UserName">@Model[i].Username</div>
+                        <div class="MsgDate">@Model[i].DateTime.ToString("yyyy-MM-dd hh:mm:ss")</div>
+                    </span>
+                    <span class="ReplyNum">@Model[i].ReplyNum 回复(@Model[i].NewReply 新)</span>
+                    <span class="IsPublic">未公开</span>
+                    <span class="Delete"><button class="DeleteBtn">删除</button></span>
+                </div>
+            }
+        </div>
+        <div style="margin-top: 60px">
+            <h4>已公开</h4>
+            @for (; i < Model.Count; i++) {
+                <div class="MsgTitleDiv">
+                    <a class="Title" href="/MyUserCenter/GetMessage?MsgId=@Model[i].Id">@Model[i].Title</a>
+                    <span>
+                        <div class="UserName">@Model[i].Username</div>
+                        <div class="MsgDate">@Model[i].DateTime.ToString("yyyy-MM-dd hh:mm:ss")</div>
+                    </span>
+                    <span class="ReplyNum">@Model[i].ReplyNum 回复(@Model[i].NewReply 新)</span>
+                    <span class="IsPublic">公开</span>
+                </div>
+            }
+        </div>
+    </div>
+</body>
+</html>

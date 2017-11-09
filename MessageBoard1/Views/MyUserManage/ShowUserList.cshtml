@@ -41,9 +41,9 @@
 
             $(".DeleteBtn").click(function () {
                 if (confirm("确定删除该用户吗？")) {
-                    //从点击的按钮的那行获取id，跳转到删除用户的Ation，用get方式传递id
-                    var id = $(this).parent().siblings(".IdTd").text();
-                    location.href = "/MyUserManage/DeleteUser?id=" + id;
+                    //从点击的按钮的那行获取用户名，跳转到删除用户的Ation，用get方式传递Username
+                    var username = $(this).parent().siblings(".UsernameTd").text();
+                    location.href = "/MyUserManage/DeleteUser?Username=" + username;
                 }
             });
 

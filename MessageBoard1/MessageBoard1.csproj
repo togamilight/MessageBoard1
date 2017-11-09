@@ -212,17 +212,20 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Admin.cs" />
+    <Compile Include="Models\Message.cs" />
     <Compile Include="Models\MyAccountStatus.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MyUser.cs" />
+    <Compile Include="Models\Reply.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="css\global.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -293,6 +296,10 @@
     <Content Include="Views\MyAdminCenter\ChangeAdminInfo.cshtml" />
     <Content Include="Views\MyAdminCenter\SignUp.cshtml" />
     <Content Include="Views\MyUserManage\ShowUserList.cshtml" />
+    <Content Include="Views\MyUserCenter\WriteMessage.cshtml" />
+    <Content Include="Views\MyUserCenter\GetHistoryMessage.cshtml" />
+    <Content Include="Views\MyUserCenter\LookMessage.cshtml" />
+    <Content Include="Views\MyUserCenter\EditMessage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

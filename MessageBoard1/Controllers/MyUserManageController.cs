@@ -27,10 +27,10 @@ namespace MessageBoard1.Controllers
         }
 
 
-        public ActionResult DeleteUser(int id) {
+        public ActionResult DeleteUser(string Username) {
             DataAccess dataAcc = new DataAccess();
-            dataAcc.DeleteUser(id);
-            return GetAllUserList();
+            dataAcc.DeleteUser(Username);
+            return RedirectToAction("GetAllUserList");
         }
 
         [HttpPost]
