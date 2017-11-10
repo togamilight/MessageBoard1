@@ -1,5 +1,4 @@
-﻿@using MessageBoard1.Models
-@model Message
+﻿
 @{
     Layout = null;
 }
@@ -10,7 +9,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>EditMessage</title>
-    <link type="text/css" rel="stylesheet" href="~/css/global.css"/>
+    <link type="text/css" rel="stylesheet" href="~/css/global.css" />
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -31,18 +30,31 @@
                     e.preventDefault(); //取消事件的默认动作，即取消提交
                 }
             });
+            //验证表单
+            $("#ReplyForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var replyContent = $("#ReplyContent").val();
+
+                if (/^\s*$/.test(content)) {   //判断字符串是否全是空格或为空
+                    errorInfo += "回复内容不能为空\n";
+                }
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
         });
     </script>
 </head>
 <body>
-    @Html.Partial("UserHeader")
-    @Html.Partial("UserCenterHeader")
+    @Html.Partial("AdminHeader")
+    @Html.Partial("MyBackMenuHeader")
     <div>
         <h3>@ViewData["Message"]</h3>
         <div class="MsgDiv">
-            <form style="width: 100%;" method="post" action="/MyUserCenter/ChangeMessage" id="MsgForm">
-                <input type="text" name="Id" value="@Model.Id" style="display:none"/>
-                <input type="text" name="Title" id="Title" value="@Model.Title"/>
+            <form style="width: 100%;" method="post" action="/MyMessageManage/ChangeMessage" id="MsgForm">
+                <input type="text" name="Id" value="@Model.Id" style="display:none" />
+                <input type="text" name="Title" id="Title" value="@Model.Title" />
                 <div class="AuthorInfoDiv"><span class="UserName">@Model.Username</span><span class="MsgDate">@Model.DateTime.ToString("yyyy-MM-dd hh:mm:ss")</span></div>
                 <textarea rows="12" name="Content" style="margin-top:0" id="Content">@Model.Content</textarea>
                 <input class="ConfirmBtn" type="submit" value="修改" />
@@ -54,6 +66,11 @@
                     <div class="ReplyContent">@reply.Content</div>
                 </div>
             }
+            <form style="width: 100%;" method="post" action="/MyMessageManage/SaveReply" id="ReplyForm">
+                <input type="text" name="MessageId" value="@Model.Id" style="display:none" />
+                <textarea rows="6" name="Content" style="margin-top:15px" placeholder="请输入回复内容" id="ReplyContent"></textarea>
+                <input class="ReplyBtn" type="submit" value="回复" />
+            </form>
         </div>
     </div>
 </body>

@@ -202,6 +202,7 @@
     <Compile Include="Controllers\MyAdminController.cs" />
     <Compile Include="Controllers\MyBackController.cs" />
     <Compile Include="Controllers\MyHomeController.cs" />
+    <Compile Include="Controllers\MyMessageManageController.cs" />
     <Compile Include="Controllers\MyUserCenterController.cs" />
     <Compile Include="Controllers\MyUserController.cs" />
     <Compile Include="Controllers\MyUserManageController.cs" />
@@ -300,6 +301,9 @@
     <Content Include="Views\MyUserCenter\GetHistoryMessage.cshtml" />
     <Content Include="Views\MyUserCenter\LookMessage.cshtml" />
     <Content Include="Views\MyUserCenter\EditMessage.cshtml" />
+    <Content Include="Views\MyMessageManage\ShowMsgTitleList.cshtml" />
+    <Content Include="Views\MyMessageManage\EditMessage.cshtml" />
+    <Content Include="Views\Shared\MyBackMenuHeader.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

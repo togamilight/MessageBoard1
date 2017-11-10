@@ -1,4 +1,5 @@
-﻿
+﻿@using MessageBoard1.Models
+@model Message
 @{
     Layout = null;
 }
@@ -9,9 +10,24 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>LookMessage</title>
+    <link type="text/css" rel="stylesheet" href="~/css/global.css" />
 </head>
 <body>
+    @Html.Partial("UserHeader")
+    @Html.Partial("UserCenterHeader")
     <div> 
+        <div class="MsgDiv">
+            <div class="TitleDiv">@Model.Title</div>
+            <div class="AuthorInfoDiv"><span class="UserName">@Model.Username</span><span class="MsgDate">@Model.DateTime.ToString("yyyy-MM-dd hh:mm:ss")</span></div>
+            <div class="ContentDiv">@Model.Content</div>
+            <h4>回复</h4>
+            @foreach (var reply in Model.Replies) {
+                <div class="ReplyDiv">
+                    <div><span class="AdminName">@reply.AdminName</span><span class="ReplyDate">@reply.DateTime.ToString("yyyy-MM-dd hh:mm:ss")</span></div>
+                    <div class="ReplyContent">@reply.Content</div>
+                </div>
+            }
+        </div>
     </div>
 </body>
 </html>

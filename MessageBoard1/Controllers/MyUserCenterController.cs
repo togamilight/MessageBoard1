@@ -65,19 +65,28 @@ namespace MessageBoard1.Controllers
             return View("GetHistoryMessage", msgs);
         }
 
-        public ActionResult GetMessage(int MsgId) {
+        public ActionResult GetMessage(int MsgId ,string messge = "") {
             DataAccess dataAcc = new DataAccess();
             Message msg = dataAcc.GetMessage(MsgId);
+            //更新留言和用户的最新回复数
+            dataAcc.ClearNewReply(MsgId, (string)Session["AccountName"]);
             if (msg.IsPublic) {
-                return View("LookMessage");
+                return View("LookMessage", msg);
             }
-            return View("EditMessage");
+            ViewData["Message"] = messge;
+            return View("EditMessage", msg);
         }
 
         public ActionResult DeleteMessage(int MsgId) {
             DataAccess dataAcc = new DataAccess();
             dataAcc.DeleteMessage(MsgId);
             return RedirectToAction("GetHistoryMessage");
+        }
+
+        public ActionResult ChangeMessage(Message msg) {
+            DataAccess dataAcc = new DataAccess();
+            dataAcc.ChangeMessage(msg);
+            return RedirectToAction("GetMessage", new { msgId = msg.Id, message = "修改成功" });
         }
     }
 }

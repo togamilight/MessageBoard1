@@ -74,19 +74,20 @@ namespace MessageBoard1.DataAccessLayer {
             return result;
         }
 
-        //通过用户名获取所有用户能修改的信息，不包括密码(现在只有电话号码)
+        //通过用户名获取所有用户能修改的信息和新回复数，不包括密码(现在只有电话号码)
         public MyUser GetUserInfo(string username) {
             var conn = GetConnection();
             conn.Open();
 
             //根据用户名查询信息
-            string cmdText = "select PhoneNum from MyUser where Username = @Username;";
+            string cmdText = "select PhoneNum,NewReply from MyUser where Username=@Username;";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
             SqlDataReader reader = cmd.ExecuteReader();
             MyUser user = new MyUser();
             while (reader.Read()) {
                 user.PhoneNum = reader.GetString(0);
+                user.NewReply = reader.GetInt32(1);
             }
             user.Username = username;
 
@@ -174,7 +175,23 @@ namespace MessageBoard1.DataAccessLayer {
             return msgs;
         }
 
-        //查询所有用户信息，组成List
+        public List<Message> GetAllMsgTitleList() {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询所有留言, 并排序
+            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var users = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return users;
+        }
+
+        //查询用户所有留言信息，组成List
         public List<Message> GetUserMsgTitleList(string username) {
             var conn = GetConnection();
             conn.Open();
@@ -184,12 +201,12 @@ namespace MessageBoard1.DataAccessLayer {
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
             SqlDataReader reader = cmd.ExecuteReader();
-            var users = GetMsgTitleList(reader);
+            var msgs = GetMsgTitleList(reader);
 
             reader.Close();
             conn.Close();
 
-            return users;
+            return msgs;
         }
 
         //判断管理员的用户名密码是否正确
@@ -323,49 +340,57 @@ namespace MessageBoard1.DataAccessLayer {
         public int DeleteUser(string username) {
             var conn = GetConnection();
             conn.Open();
-            //开启一个事务
-            SqlTransaction trans = conn.BeginTransaction();
-            var cmd = new SqlCommand();
-            cmd.Connection = conn;
-            cmd.Transaction = trans;
-            try {
-                //删除管理员对这个用户的所有回复
-                cmd.CommandText = "delete from Reply where MessageId in (select Id from Message where Username = @Username);";
-                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-                cmd.ExecuteNonQuery();
-                
-                //删除这个用户的所有留言 
-                cmd.CommandText = "delete from Message where Username = @Username;";
-                cmd.ExecuteNonQuery();
 
-                //根据id删除用户
-                cmd.CommandText = "delete from MyUser where Username = @Username;";
-                int line = cmd.ExecuteNonQuery();
+            //根据id删除用户
+            string cmdText = "delete from MyUser where Username=@Username;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+            int line = cmd.ExecuteNonQuery();
 
-                //提交事务
-                trans.Commit();
+            conn.Close();
 
-                return line;
-            }
-            catch (Exception) {
-                //当遇到异常时回滚事务
-                trans.Rollback();
-                throw;
-            }
-            finally {
-                conn.Close();
-            }
-            ////根据id删除用户
-            //string cmdText = "delete from MyUser where Id=@Id;";
-            //var cmd = new SqlCommand(cmdText, conn);
-            //cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
-            //int line = cmd.ExecuteNonQuery();
+            return line;
+
+            //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
+            ////开启一个事务
+            //SqlTransaction trans = conn.BeginTransaction();
+            //var cmd = new SqlCommand();
+            //cmd.Connection = conn;
+            //cmd.Transaction = trans;
+            //try {
+            //    //删除管理员对这个用户的所有回复
+            //    cmd.CommandText = "delete from Reply where MessageId in (select Id from Message where Username = @Username);";
+            //    cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+            //    cmd.ExecuteNonQuery();
+
+            //    //删除这个用户的所有留言 
+            //    cmd.CommandText = "delete from Message where Username = @Username;";
+            //    cmd.ExecuteNonQuery();
+
+            //    //根据id删除用户
+            //    cmd.CommandText = "delete from MyUser where Username = @Username;";
+            //    int line = cmd.ExecuteNonQuery();
+
+            //    //提交事务
+            //    trans.Commit();
+
+            //    return line;
+            //}
+            //catch (Exception) {
+            //    //当遇到异常时回滚事务
+            //    trans.Rollback();
+            //    throw;
+            //}
+            //finally {
+            //    conn.Close();
+            //}
         }
 
         //删除留言
         public int DeleteMessage(int MsgId) {
             var conn = GetConnection();
             conn.Open();
+
             //开启一个事务
             SqlTransaction trans = conn.BeginTransaction();
             var cmd = new SqlCommand();
@@ -376,15 +401,9 @@ namespace MessageBoard1.DataAccessLayer {
                 cmd.CommandText = "update MyUser set NewReply = NewReply - (select NewReply from Message where Id = @MsgId) where Username in (select Username from Message where Id = @MsgId);";
                 cmd.Parameters.Add("@MsgId", SqlDbType.Int).Value = MsgId;
                 cmd.ExecuteNonQuery();
-
-                //删除管理员对这个留言的所有回复
-                cmd.CommandText = "delete from Reply where MessageId = @MsgId;";
-                cmd.ExecuteNonQuery();
-
                 //删除这个留言 
                 cmd.CommandText = "delete from Message where Id = @MsgId;";
                 int line = cmd.ExecuteNonQuery();
-
                 //提交事务
                 trans.Commit();
 
@@ -398,10 +417,54 @@ namespace MessageBoard1.DataAccessLayer {
             finally {
                 conn.Close();
             }
+
+            //没有更新新回复数，故弃用-----------------
+            //string cmdText = "delete from Message where Id = @MsgId;";
+            //var cmd = new SqlCommand(cmdText, conn);
+            //cmd.Parameters.Add("@MsgId", SqlDbType.Int).Value = MsgId;
+            //int line = cmd.ExecuteNonQuery();
+            //conn.Close();
+            //return line;
+            //----------------------------
+
+            //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
+
+            ////开启一个事务
+            //SqlTransaction trans = conn.BeginTransaction();
+            //var cmd = new SqlCommand();
+            //cmd.Connection = conn;
+            //cmd.Transaction = trans;
+            //try {
+            //    //更新用户的新回复数（减去要删除的留言的新回复数）
+            //    cmd.CommandText = "update MyUser set NewReply = NewReply - (select NewReply from Message where Id = @MsgId) where Username in (select Username from Message where Id = @MsgId);";
+            //    cmd.Parameters.Add("@MsgId", SqlDbType.Int).Value = MsgId;
+            //    cmd.ExecuteNonQuery();
+
+            //    //删除管理员对这个留言的所有回复
+            //    cmd.CommandText = "delete from Reply where MessageId = @MsgId;";
+            //    cmd.ExecuteNonQuery();
+
+            //    //删除这个留言 
+            //    cmd.CommandText = "delete from Message where Id = @MsgId;";
+            //    int line = cmd.ExecuteNonQuery();
+
+            //    //提交事务
+            //    trans.Commit();
+
+            //    return line;
+            //}
+            //catch (Exception) {
+            //    //当遇到异常时回滚事务
+            //    trans.Rollback();
+            //    throw;
+            //}
+            //finally {
+            //    conn.Close();
+            //}
         }
 
         //管理员版本的修改用户信息(可修改用户名，密码和手机号码)
-        public int ChangeUserInfoByAdmin(MyUser user) {
+        public int ChangeUserInfoByAdmin(MyUser user  /*,string OldUsername*/) {
             var conn = GetConnection();
             conn.Open();
 
@@ -415,7 +478,42 @@ namespace MessageBoard1.DataAccessLayer {
             int line = cmd.ExecuteNonQuery();
 
             conn.Close();
+
             return line;
+
+            //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
+
+            ////开启一个事务
+            //SqlTransaction trans = conn.BeginTransaction();
+            //var cmd = new SqlCommand();
+            //cmd.Connection = conn;
+            //cmd.Transaction = trans;
+            //try {
+            //    if(user.Username != OldUsername) {  //当用户名被修改时，修改对应的Message
+            //        cmd.CommandText = "update Mssage set Username = @Username where Username = @OldUsername";
+            //        cmd.Parameters.Add("@Username", SqlDbType.Int).Value = user.Username;
+            //        cmd.Parameters.Add("@OldUsername", SqlDbType.Int).Value = OldUsername;
+            //        cmd.ExecuteNonQuery();
+            //    }
+            //    //修改
+            //    cmd.CommandText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
+            //    cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+            //    cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+            //    cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+            //    int line = cmd.ExecuteNonQuery();
+            //    //提交事务
+            //    trans.Commit();
+
+            //    return line;
+            //}
+            //catch (Exception) {
+            //    //当遇到异常时回滚事务
+            //    trans.Rollback();
+            //    throw;
+            //}
+            //finally {
+            //    conn.Close();
+            //}
         }
 
         //根据Id获取Message，包括相应的回复
@@ -454,11 +552,11 @@ namespace MessageBoard1.DataAccessLayer {
             int c5 = reader1.GetOrdinal("DateTime");
             while(reader1.Read()){
                 Reply reply = new Reply() {
-                    Id = (int)reader1[1],
-                    MessageId = (int)reader1[2],
-                    AdminName = (string)reader1[3],
-                    Content = (string)reader1[4],
-                    DateTime = (DateTime)reader1[5]
+                    Id = (int)reader1[c1],
+                    MessageId = (int)reader1[c2],
+                    AdminName = (string)reader1[c3],
+                    Content = (string)reader1[c4],
+                    DateTime = (DateTime)reader1[c5]
                 };
                 replies.Add(reply);
             }
@@ -467,6 +565,124 @@ namespace MessageBoard1.DataAccessLayer {
 
             msg.Replies = replies;
             return msg;
+        }
+
+        //修改留言
+        public int ChangeMessage(Message msg) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //修改留言
+            string cmdText = "update Message set Title = @Title, Content = @Content where Id = @Id";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = msg.Id;
+            cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
+            cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+        }
+
+        //切换留言公开状态
+        public int SwitchMsgState(int MsgId) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //切换公开状态
+            string cmdText = "update Message set IsPublic = (case when IsPublic=1 then 0 else 1 end) where Id = @Id;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = MsgId;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+        }
+
+        public List<Message> SearchMsgTitleList(string keyWord) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //根据关键词查询用户查询
+            string cmdText = "select * from Message where Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%' order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
+        }
+
+        //保存回复
+        public int SaveReply(Reply reply) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //开启一个事务
+            SqlTransaction trans = conn.BeginTransaction();
+            var cmd = new SqlCommand();
+            cmd.Connection = conn;
+            cmd.Transaction = trans;
+            try {
+                //保存回复
+                cmd.CommandText = "insert into Reply(MessageId,AdminName,Content,DateTime) values(@MessageId,@AdminName,@Content,@DateTime);";
+                cmd.Parameters.Add("@MessageId", SqlDbType.Int).Value = reply.MessageId;
+                cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = reply.AdminName;
+                cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = reply.Content;
+                cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;
+                int line = cmd.ExecuteNonQuery();
+                //更新回复数
+                cmd.CommandText = "update Message set ReplyNum=ReplyNum+1, NewReply=NewReply+1 where Id=@MessageId;";
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = "update MyUser set NewReply=NewReply+1 where Username in (select Username from Message where Id=@MessageId);";
+                cmd.ExecuteNonQuery();
+                //提交事务
+                trans.Commit();
+
+                return line;
+            }
+            catch (Exception) {
+                //当遇到异常时回滚事务
+                trans.Rollback();
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
+        }
+
+        public void ClearNewReply(int MsgId, string Username) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //开启一个事务
+            SqlTransaction trans = conn.BeginTransaction();
+            var cmd = new SqlCommand();
+            cmd.Connection = conn;
+            cmd.Transaction = trans;
+            try {
+                //将新回复数设为0
+                cmd.CommandText = "update Message set NewReply=0 where Id=@MessageId;";
+                cmd.Parameters.Add("@MessageId", SqlDbType.Int).Value = MsgId;
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = "update MyUser set NewReply=0 where Username=@Username;";
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = Username;
+                cmd.ExecuteNonQuery();
+                //提交事务
+                trans.Commit();
+            }
+            catch (Exception) {
+                //当遇到异常时回滚事务
+                trans.Rollback();
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
     }
 }

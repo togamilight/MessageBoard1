@@ -34,9 +34,9 @@ namespace MessageBoard1.Controllers
         }
 
         [HttpPost]
-        public ActionResult ChangeUserInfo(MyUser user) {
+        public ActionResult ChangeUserInfo(MyUser user/*,  string OldUsername*/) {
             DataAccess dataAcc = new DataAccess();
-            dataAcc.ChangeUserInfoByAdmin(user);
+            dataAcc.ChangeUserInfoByAdmin(user/*, OldUsername*/);
             return GetAllUserList();
         }
 

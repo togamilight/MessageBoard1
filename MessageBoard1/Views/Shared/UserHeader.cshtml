@@ -1,11 +1,13 @@
-﻿<!--用户页面的头部-->
+﻿@using MessageBoard1.Models
+@model MyUser
+<!--用户页面的头部-->
 <div style="display:flex; justify-content:space-between">
     <a href="/MyHome/Index" style="margin-left:30px;margin-top:30px">首页</a>
     <h2>欢迎使用留言系统</h2>
     <div style="margin-right:30px;margin-top:30px">
         你好！
         @if (Session["AccountStatus"] != null && (MyAccountStatus)Session["AccountStatus"] == MyAccountStatus.User) {
-            <a href="/MyUserCenter/ChangeUserInfo">@Session["AccountName"]</a>  <a href="/MyUser/Logout" style="font-size:8px">注销</a>
+            <a href="/MyUserCenter/ChangeUserInfo">@Model.Username (@Model.NewReply 新)</a>  <a href="/MyUser/Logout" style="font-size:8px">注销</a>
         }
         else {
             <a href="/MyUser/Login">请登录</a>  <a href="/MyUser/SignUp">注册</a>

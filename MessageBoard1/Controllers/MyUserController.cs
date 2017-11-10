@@ -10,6 +10,16 @@ namespace MessageBoard1.Controllers
 {
     public class MyUserController : Controller
     {
+        public ActionResult GetUserHeader() {
+            MyUser user = new MyUser();
+            if(Session["AccountStatus"] != null && (MyAccountStatus)Session["AccountStatus"] == MyAccountStatus.User) {
+                DataAccess dataAcc = new DataAccess();
+                string userName = (string)Session["AccountName"];
+                user = dataAcc.GetUserInfo(userName);
+            }
+
+            return PartialView("UserHeader", user);
+        }
         //注册页面
         public ActionResult SignUp() {
             //已经登录时不能注册

@@ -20,6 +20,7 @@
 			text-overflow: ellipsis;
 			white-space: nowrap;
 			width: 50%;
+            padding-left:10px;
 		}
 		.MsgTitleDiv span{
 			margin-left: 30px;
@@ -33,7 +34,7 @@
     align-items: center;
 }
 
-    .MsgDiv form, .MsgDiv input, .MsgDiv textarea, .MsgDiv .ConfirmBtn {
+    .MsgDiv form, .MsgDiv input, .MsgDiv textarea, .MsgDiv .TitleDiv, .MsgDiv .AuthorInfoDiv, .MsgDiv .ContentDiv {
         font-size: 18px;
         width: 100%;
     }
@@ -51,3 +52,37 @@
         color: grey;
         margin-left: 10px;
     }
+
+    .MsgDiv .ConfirmBtn, .MsgDiv .ReplyBtn{
+			margin-top: 10px;
+		}
+		
+		.MsgDiv .ReplyDiv{
+			width: 100%;
+			padding: 10px;
+			border-bottom: 1px solid black;
+		}
+		.MsgDiv .ReplyDiv .AdminName{
+			font-size: 14px;
+		}
+		.MsgDiv .ReplyDiv .ReplyDate{
+			font-size: 10px;
+			color: grey;
+			margin-left: 10px;
+		}
+		.MsgDiv .ReplyDiv .ReplyContent{
+			margin-top: 10px;
+			font-size: 16px;
+            word-wrap:break-word;
+		}
+		
+		.MsgDiv .TitleDiv, .MsgDiv .ContentDiv{
+			margin-top: 10px;
+			word-wrap:break-word;
+			font-size: 22px;
+			margin-bottom: 10px;
+			border-left: 1px solid gray;
+			border-right: 1px solid gray;
+			padding-left: 10px;
+			padding-right: 10px;
+		}

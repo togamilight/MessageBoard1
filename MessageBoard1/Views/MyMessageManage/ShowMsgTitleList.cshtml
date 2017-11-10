@@ -1,0 +1,93 @@
+﻿@using MessageBoard1.Models
+@model List<Message>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ShowMsgTitleList</title>
+    <link href="~/css/global.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".DeleteBtn").click(function () {
+                if (confirm("确定删除该留言吗？")) {
+                    //从点击的按钮的那行获取MessagId，跳转到删除留言的Ation，用get方式传递MessageId
+                    var msgId = $(this).parent().siblings(".MsgId").text();
+                    location.href = "/MyMessageManage/DeleteMessage?MsgId=" + msgId;
+                }
+            });
+            $(".SwitchBtn").click(function () {
+                var msgId = $(this).parent().siblings(".MsgId").text();
+                var isPublicSpan = $(this).parent().siblings(".IsPublic");
+                var data = {
+                    MsgId : msgId
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/MyMessageManage/SwitchMsgState',
+                    data: data,
+                    success: function (r) {
+                        var str = isPublicSpan.text();
+                        isPublicSpan.text(str == "已公开" ? "未公开" : "已公开");
+                    }
+                });
+            });
+            //验证表单
+            $("#SearchMsgForm").submit(function (e) {
+                var errorInfo = "";     //记录错误信息
+                var keyWord = $("#KeyWord").val();
+                //if (keyWord == "") {
+                //    errorInfo += "请输入关键字 \n";
+                //} 
+                if (keyWord.length >= 20) {
+                    errorInfo += "关键字不能超过20个字符 \n";
+                } else if (keyWord.indexOf(" ") != -1) {
+                    errorInfo += "关键字不能含有空格 \n";
+                }
+                if (errorInfo != "") {
+                    alert(errorInfo);
+                    e.preventDefault(); //取消事件的默认动作，即取消提交
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    @Html.Partial("AdminHeader")
+    @Html.Partial("MyBackMenuHeader")
+    <div style="text-align:right; margin-top:20px; margin-right:30px">
+        <form action="/MyMessageManage/SearchMsgs" method="post" id="SearchMsgForm">
+            <input type="text" name="KeyWord" id="KeyWord" placeholder="请输入留言的关键字" />
+            <input type="submit" value="搜索留言" />
+        </form>
+    </div>
+    <div>
+        <h3 style="text-align:center">@ViewData["Message"]</h3>
+        @foreach (var msg in Model) {
+                <div class="MsgTitleDiv">
+                    <span class="MsgId">@msg.Id</span>
+                    <a class="Title" href="/MyMessageManage/GetMessage?MsgId=@msg.Id">@msg.Title</a>
+                    <span>
+                        <div class="UserName">@msg.Username</div>
+                        <div class="MsgDate">@msg.DateTime.ToString("yyyy-MM-dd hh:mm:ss")</div>
+                    </span>
+                    <span class="ReplyNum">@msg.ReplyNum 回复</span>
+                    @if (msg.IsPublic) {
+                        <span class="IsPublic">已公开</span>
+                    }
+                    else {
+                        <span class="IsPublic">未公开</span>
+                    }
+                    <span class="Delete"><button class="DeleteBtn">删除</button></span>
+                    <span class="SwitchState"><button class="SwitchBtn">切换状态</button></span>
+                </div>
+        }
+    </div>
+
+</body>
+</html>

@@ -33,8 +33,6 @@
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script>
         $(document).ready(function () {
-            var oldUsername = "";       //用于存储原用户名
-
             //显示用户列表，隐藏编辑块
             $("#UserListDiv").show();
             $("#EditDiv").hide();
@@ -47,6 +45,11 @@
                 }
             });
 
+            $(".LookMsgBtn").click(function () {
+                var username = $(this).parent().siblings(".UsernameTd").text();
+                location.href = "/MyMessageManage/GetUserMsgTitleList?Username=" + username;
+            });
+
             $(".EditBtn").click(function () {
                 //从点击的按钮的那行收集数据填入表单的Input框中
                 var id = $(this).parent().siblings(".IdTd").text();
@@ -55,6 +58,7 @@
                 var phoneNum = $(this).parent().siblings(".PhoneNumTd").text();
                 var signDate = $(this).parent().siblings(".SignDateTd").text();
 
+                $("#OldUsername").val(username);
                 $("#Id").val(id);
                 $("#Username").val(username);
                 $("#Password").val(password);
@@ -76,6 +80,7 @@
             //验证表单
             $("#EditForm").submit(function (e) {
                 var errorInfo = "";     //记录错误信息
+                var oldUsername = $("#OldUsername").val();
                 var username = $("#Username").val();
                 var password = $("#Password").val();
                 var phoneNum = $("#PhoneNum").val();
@@ -150,6 +155,7 @@
 </head>
 <body>
     @Html.Partial("AdminHeader")
+    @Html.Partial("MyBackMenuHeader")
     <div style="text-align:center"> 
         <div style="text-align:right; margin-top:20px; margin-right:30px">
             <form action="/MyUserManage/SearchUsers" method="post" id="SearchUserForm">
@@ -179,7 +185,7 @@
                         <td class="SignDateTd">@user.SignDate.ToString("yyyy/MM/dd")</td>
                         <td><button class="DeleteBtn">删除</button></td>
                         <td><button class="EditBtn">编辑</button></td>
-                        <td><button class="LookMessageBtn">查看留言</button></td>
+                        <td><button class="LookMsgBtn">查看留言</button></td>
                     </tr>
                 }
             </table>
@@ -188,6 +194,7 @@
         <div id="EditDiv" style="text-align:center; display:flex; flex-direction:column; align-items:center">
             <h3>修改用户信息</h3>
             <form action="/MyUserManage/ChangeUserInfo" method="post" id="EditForm">
+                <input type="text" name="OldUsername" id="OldUsername" style="display:none" />
                 <table>
                     <tr>
                         <td>用户Id：</td>
