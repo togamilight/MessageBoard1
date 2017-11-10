@@ -44,7 +44,7 @@
     </script>
 </head>
 <body>
-    @Html.Partial("UserHeader")
+    @{Html.RenderAction("GetUserHeader", "MyUser");}
     <div style="text-align:center; display:flex; flex-direction:column; align-items:center">
         <h3>@ViewData["Message"]</h3>
         <h3>用户登录</h3>

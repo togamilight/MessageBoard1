@@ -79,7 +79,7 @@
     </script>
 </head>
 <body>
-    @Html.Partial("UserHeader")
+    @{Html.RenderAction("GetUserHeader", "MyUser");}
     @Html.Partial("UserCenterHeader")
     <div style="text-align:center">
         <h3>@ViewData["Message"]</h3>

@@ -201,6 +201,7 @@
     <Compile Include="Controllers\MyAdminCenterController.cs" />
     <Compile Include="Controllers\MyAdminController.cs" />
     <Compile Include="Controllers\MyBackController.cs" />
+    <Compile Include="Controllers\MyErrorController.cs" />
     <Compile Include="Controllers\MyHomeController.cs" />
     <Compile Include="Controllers\MyMessageManageController.cs" />
     <Compile Include="Controllers\MyUserCenterController.cs" />
@@ -304,9 +305,12 @@
     <Content Include="Views\MyMessageManage\ShowMsgTitleList.cshtml" />
     <Content Include="Views\MyMessageManage\EditMessage.cshtml" />
     <Content Include="Views\Shared\MyBackMenuHeader.cshtml" />
+    <Content Include="Views\MyHome\LookMessage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Error\" />
+    <Folder Include="Views\MyError\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

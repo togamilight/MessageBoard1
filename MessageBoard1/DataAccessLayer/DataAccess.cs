@@ -183,12 +183,28 @@ namespace MessageBoard1.DataAccessLayer {
             string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
             var cmd = new SqlCommand(cmdText, conn);
             SqlDataReader reader = cmd.ExecuteReader();
-            var users = GetMsgTitleList(reader);
+            var msgs = GetMsgTitleList(reader);
 
             reader.Close();
             conn.Close();
 
-            return users;
+            return msgs;
+        }
+
+        public List<Message> GetAllPublicMsgTitleList() {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询所有公开留言, 并排序
+            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where IsPublic=1 order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
         }
 
         //查询用户所有留言信息，组成List
@@ -617,6 +633,22 @@ namespace MessageBoard1.DataAccessLayer {
             return msgs;
         }
 
+        public List<Message> SearchPublicMsgTitleList(string keyWord) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //根据关键词查询用户查询
+            string cmdText = "select * from Message where (Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%') and IsPublic=1 order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
+        }
+
         //保存回复
         public int SaveReply(Reply reply) {
             var conn = GetConnection();
@@ -665,12 +697,13 @@ namespace MessageBoard1.DataAccessLayer {
             cmd.Connection = conn;
             cmd.Transaction = trans;
             try {
-                //将新回复数设为0
-                cmd.CommandText = "update Message set NewReply=0 where Id=@MessageId;";
+                //用户新回复数减少
+                cmd.CommandText = "update MyUser set NewReply=NewReply-(select NewReply from Message where Id=@MessageId) where Username=@Username;";
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = Username;
                 cmd.Parameters.Add("@MessageId", SqlDbType.Int).Value = MsgId;
                 cmd.ExecuteNonQuery();
-                cmd.CommandText = "update MyUser set NewReply=0 where Username=@Username;";
-                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = Username;
+                //将新回复数设为0
+                cmd.CommandText = "update Message set NewReply=0 where Id=@MessageId;";
                 cmd.ExecuteNonQuery();
                 //提交事务
                 trans.Commit();

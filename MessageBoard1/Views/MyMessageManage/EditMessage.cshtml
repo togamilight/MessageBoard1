@@ -50,7 +50,7 @@
     @Html.Partial("AdminHeader")
     @Html.Partial("MyBackMenuHeader")
     <div>
-        <h3>@ViewData["Message"]</h3>
+        <h3 style="text-align:center">@ViewData["Message"]</h3>
         <div class="MsgDiv">
             <form style="width: 100%;" method="post" action="/MyMessageManage/ChangeMessage" id="MsgForm">
                 <input type="text" name="Id" value="@Model.Id" style="display:none" />
