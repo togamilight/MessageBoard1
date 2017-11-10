@@ -67,12 +67,14 @@ namespace MessageBoard1.Controllers
             return ShowMsgTitleList(msgs, message);
         }
 
+        [HttpPost]
         public ActionResult ChangeMessage(Message msg) {
             DataAccess dataAcc = new DataAccess();
             dataAcc.ChangeMessage(msg);
             return RedirectToAction("GetMessage", new { msgId = msg.Id, message = "修改成功" });
         }
 
+        [HttpPost]
         public ActionResult SaveReply(Reply reply) {
             reply.AdminName = (string)Session["AccountName"];
             DataAccess dataAcc = new DataAccess();

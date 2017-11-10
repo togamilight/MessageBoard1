@@ -12,12 +12,6 @@ namespace MessageBoard1.Controllers
     [UserFilter]
     public class MyUserCenterController : Controller
     {
-        // GET: MyUserCenter
-        public ActionResult Index()
-        {
-            return View();
-        }
-
         public ActionResult ChangeUserInfo(string message = "") {
             var dataAcc = new DataAccess();
             MyUser user = dataAcc.GetUserInfo((string)Session["AccountName"]);

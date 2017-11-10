@@ -19,6 +19,7 @@ namespace MessageBoard1.Controllers
             return View("Login");
         }
 
+        [HttpPost]
         public ActionResult DoLogin(Admin admin) {
             var dataAcc = new DataAccess();
             bool result = dataAcc.CheckAdmin(admin);

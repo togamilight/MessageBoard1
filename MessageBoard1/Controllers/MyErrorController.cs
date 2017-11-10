@@ -8,7 +8,6 @@ namespace MessageBoard1.Controllers
 {
     public class MyErrorController : Controller
     {
-        // GET: MyError
         public ActionResult Index()
         {
             Exception e = new Exception("无效的路径（无效的Action或Controller）");

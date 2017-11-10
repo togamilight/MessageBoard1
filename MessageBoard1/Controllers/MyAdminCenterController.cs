@@ -17,6 +17,7 @@ namespace MessageBoard1.Controllers
             return View("ChangeAdminInfo");
         }
 
+        [HttpPost]
         public ActionResult ChangePassword(string OldPassword, string NewPassword) {
             string adminName = (string)Session["AccountName"];
             Admin admin = new Admin() { AdminName = adminName, Password = OldPassword };

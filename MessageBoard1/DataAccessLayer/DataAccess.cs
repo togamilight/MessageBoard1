@@ -18,6 +18,8 @@ namespace MessageBoard1.DataAccessLayer {
             return new SqlConnection(connStr);
         }
 
+        //MyUser表操作start-------------------------------------------------------------------------------
+
         //新增用户
         public int SaveUser(MyUser user) {
             var conn = GetConnection();
@@ -129,172 +131,6 @@ namespace MessageBoard1.DataAccessLayer {
             return line;
         }
 
-        //保存用户写的新留言
-        public int SaveMessage(Message msg) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //往数据库中新增用户
-            string cmdText = "insert into Message(Username,Title,Content,DateTime) values (@Username, @Title, @Content, @DateTime);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = msg.Username;
-            cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
-            cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
-            cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;   //获取当前日期时间
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
-        }
-
-        //从reader中读取Message除内容外的数据组成List
-        public List<Message> GetMsgTitleList(SqlDataReader reader) {
-            List<Message> msgs = new List<Message>();
-            //先获取每个属性的列序号
-            int c1 = reader.GetOrdinal("Id");
-            int c2 = reader.GetOrdinal("Username");
-            int c3 = reader.GetOrdinal("Title");
-            int c4 = reader.GetOrdinal("IsPublic");
-            int c5 = reader.GetOrdinal("DateTime");
-            int c6 = reader.GetOrdinal("ReplyNum");
-            int c7 = reader.GetOrdinal("NewReply");
-            //获取属性生成Message对象，加入List
-            while (reader.Read()) {
-                Message msg = new Message() {
-                    Id = (int)reader[c1],
-                    Username = (string)reader[c2],
-                    Title = (string)reader[c3],
-                    IsPublic = (bool)reader[c4],
-                    DateTime = (DateTime)reader[c5],
-                    ReplyNum = (int)reader[c6],
-                    NewReply = (int)reader[c7],
-                };
-                msgs.Add(msg);
-            }
-            return msgs;
-        }
-
-        public List<Message> GetAllMsgTitleList() {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询所有留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
-        }
-
-        public List<Message> GetAllPublicMsgTitleList() {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询所有公开留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where IsPublic=1 order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
-        }
-
-        //查询用户所有留言信息，组成List
-        public List<Message> GetUserMsgTitleList(string username) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询用户所有留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where Username = @Username order by IsPublic, DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
-        }
-
-        //判断管理员的用户名密码是否正确
-        public bool CheckAdmin(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询是否存在该管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName and Password = @Password;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool result = reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return result;
-        }
-
-        //修改管理员密码
-        public int ChangeAdminPassword(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //修改
-            string cmdText = "update Admin set Password = @Password where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-            return line;
-        }
-
-        //新增管理员
-        public int SaveAdmin(Admin admin) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //往数据库中新增管理员
-            string cmdText = "insert into Admin(AdminName,Password) values (@AdminName, @Password);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
-        }
-
-        //判断管理员用户名是否被使用
-        public bool CheckAdminName(string AdminName) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //查询是否存在同名管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = AdminName;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool isUnique = !reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return isUnique;
-        }
-
         //从reader中读取User数据组成List
         public List<MyUser> GetUserList(SqlDataReader reader) {
             List<MyUser> users = new List<MyUser>();
@@ -341,7 +177,7 @@ namespace MessageBoard1.DataAccessLayer {
             conn.Open();
 
             //根据关键词查询用户查询
-            string cmdText = "select * from MyUser where Username like '%" + keyWord + "%';" ;
+            string cmdText = "select * from MyUser where Username like '%" + keyWord + "%';";
             var cmd = new SqlCommand(cmdText, conn);
             SqlDataReader reader = cmd.ExecuteReader();
             var users = GetUserList(reader);
@@ -357,7 +193,7 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //根据id删除用户
+            //删除用户
             string cmdText = "delete from MyUser where Username=@Username;";
             var cmd = new SqlCommand(cmdText, conn);
             cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
@@ -400,6 +236,164 @@ namespace MessageBoard1.DataAccessLayer {
             //finally {
             //    conn.Close();
             //}
+        }
+
+        //管理员版本的修改用户信息(可修改用户名，密码和手机号码)
+        public int ChangeUserInfoByAdmin(MyUser user  /*,string OldUsername*/) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //修改
+            string cmdText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+            cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+
+            //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
+
+            ////开启一个事务
+            //SqlTransaction trans = conn.BeginTransaction();
+            //var cmd = new SqlCommand();
+            //cmd.Connection = conn;
+            //cmd.Transaction = trans;
+            //try {
+            //    if(user.Username != OldUsername) {  //当用户名被修改时，修改对应的Message
+            //        cmd.CommandText = "update Mssage set Username = @Username where Username = @OldUsername";
+            //        cmd.Parameters.Add("@Username", SqlDbType.Int).Value = user.Username;
+            //        cmd.Parameters.Add("@OldUsername", SqlDbType.Int).Value = OldUsername;
+            //        cmd.ExecuteNonQuery();
+            //    }
+            //    //修改
+            //    cmd.CommandText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
+            //    cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+            //    cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+            //    cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+            //    int line = cmd.ExecuteNonQuery();
+            //    //提交事务
+            //    trans.Commit();
+
+            //    return line;
+            //}
+            //catch (Exception) {
+            //    //当遇到异常时回滚事务
+            //    trans.Rollback();
+            //    throw;
+            //}
+            //finally {
+            //    conn.Close();
+            //}
+        }
+
+        //MyUser表操作end-----------------------------------------------------------------------------
+
+
+
+
+        //Message表操作start-------------------------------------------------------------------------
+
+        //保存用户写的新留言
+        public int SaveMessage(Message msg) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //往数据库中新增留言
+            string cmdText = "insert into Message(Username,Title,Content,DateTime) values (@Username, @Title, @Content, @DateTime);";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = msg.Username;
+            cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
+            cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
+            cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;   
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+        }
+
+        //从reader中读取Message除Content外的数据组成List
+        public List<Message> GetMsgTitleList(SqlDataReader reader) {
+            List<Message> msgs = new List<Message>();
+            //先获取每个属性的列序号
+            int c1 = reader.GetOrdinal("Id");
+            int c2 = reader.GetOrdinal("Username");
+            int c3 = reader.GetOrdinal("Title");
+            int c4 = reader.GetOrdinal("IsPublic");
+            int c5 = reader.GetOrdinal("DateTime");
+            int c6 = reader.GetOrdinal("ReplyNum");
+            int c7 = reader.GetOrdinal("NewReply");
+            //获取属性生成Message对象，加入List
+            while (reader.Read()) {
+                Message msg = new Message() {
+                    Id = (int)reader[c1],
+                    Username = (string)reader[c2],
+                    Title = (string)reader[c3],
+                    IsPublic = (bool)reader[c4],
+                    DateTime = (DateTime)reader[c5],
+                    ReplyNum = (int)reader[c6],
+                    NewReply = (int)reader[c7],
+                };
+                msgs.Add(msg);
+            }
+            return msgs;
+        }
+
+        //获取所有留言的标题信息
+        public List<Message> GetAllMsgTitleList() {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询所有留言, 并排序
+            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
+        }
+
+        //获取所有公开留言的标题信息
+        public List<Message> GetAllPublicMsgTitleList() {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询所有公开留言, 并排序
+            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where IsPublic=1 order by DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
+        }
+
+        //查询用户所有留言信息，组成List
+        public List<Message> GetUserMsgTitleList(string username) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询用户所有留言, 并排序
+            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where Username = @Username order by IsPublic, DateTime desc;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+            SqlDataReader reader = cmd.ExecuteReader();
+            var msgs = GetMsgTitleList(reader);
+
+            reader.Close();
+            conn.Close();
+
+            return msgs;
         }
 
         //删除留言
@@ -479,59 +473,6 @@ namespace MessageBoard1.DataAccessLayer {
             //}
         }
 
-        //管理员版本的修改用户信息(可修改用户名，密码和手机号码)
-        public int ChangeUserInfoByAdmin(MyUser user  /*,string OldUsername*/) {
-            var conn = GetConnection();
-            conn.Open();
-
-            //修改
-            string cmdText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
-
-            //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
-
-            ////开启一个事务
-            //SqlTransaction trans = conn.BeginTransaction();
-            //var cmd = new SqlCommand();
-            //cmd.Connection = conn;
-            //cmd.Transaction = trans;
-            //try {
-            //    if(user.Username != OldUsername) {  //当用户名被修改时，修改对应的Message
-            //        cmd.CommandText = "update Mssage set Username = @Username where Username = @OldUsername";
-            //        cmd.Parameters.Add("@Username", SqlDbType.Int).Value = user.Username;
-            //        cmd.Parameters.Add("@OldUsername", SqlDbType.Int).Value = OldUsername;
-            //        cmd.ExecuteNonQuery();
-            //    }
-            //    //修改
-            //    cmd.CommandText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
-            //    cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            //    cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
-            //    cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
-            //    int line = cmd.ExecuteNonQuery();
-            //    //提交事务
-            //    trans.Commit();
-
-            //    return line;
-            //}
-            //catch (Exception) {
-            //    //当遇到异常时回滚事务
-            //    trans.Rollback();
-            //    throw;
-            //}
-            //finally {
-            //    conn.Close();
-            //}
-        }
-
         //根据Id获取Message，包括相应的回复
         public Message GetMessage(int Id) {
             var conn = GetConnection();
@@ -566,7 +507,7 @@ namespace MessageBoard1.DataAccessLayer {
             int c3 = reader1.GetOrdinal("AdminName");
             int c4 = reader1.GetOrdinal("Content");
             int c5 = reader1.GetOrdinal("DateTime");
-            while(reader1.Read()){
+            while (reader1.Read()) {
                 Reply reply = new Reply() {
                     Id = (int)reader1[c1],
                     MessageId = (int)reader1[c2],
@@ -617,11 +558,12 @@ namespace MessageBoard1.DataAccessLayer {
             return line;
         }
 
+        //搜索留言
         public List<Message> SearchMsgTitleList(string keyWord) {
             var conn = GetConnection();
             conn.Open();
 
-            //根据关键词查询用户查询
+            //根据关键词查询留言
             string cmdText = "select * from Message where Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%' order by DateTime desc;";
             var cmd = new SqlCommand(cmdText, conn);
             SqlDataReader reader = cmd.ExecuteReader();
@@ -633,11 +575,12 @@ namespace MessageBoard1.DataAccessLayer {
             return msgs;
         }
 
+        //搜索公开留言
         public List<Message> SearchPublicMsgTitleList(string keyWord) {
             var conn = GetConnection();
             conn.Open();
 
-            //根据关键词查询用户查询
+            //根据关键词查询留言
             string cmdText = "select * from Message where (Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%') and IsPublic=1 order by DateTime desc;";
             var cmd = new SqlCommand(cmdText, conn);
             SqlDataReader reader = cmd.ExecuteReader();
@@ -648,6 +591,87 @@ namespace MessageBoard1.DataAccessLayer {
 
             return msgs;
         }
+
+        //Message表操作end-------------------------------------------------------------------------
+
+
+
+        //Admin表操作start-------------------------------------------------------------------------
+
+        //判断管理员的用户名密码是否正确
+        public bool CheckAdmin(Admin admin) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询是否存在该管理员
+            string cmdText = "select Id from Admin where AdminName = @AdminName and Password = @Password;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+            SqlDataReader reader = cmd.ExecuteReader();
+            bool result = reader.HasRows;
+
+            reader.Close();
+            conn.Close();
+
+            return result;
+        }
+
+        //修改管理员密码
+        public int ChangeAdminPassword(Admin admin) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //修改
+            string cmdText = "update Admin set Password = @Password where AdminName = @AdminName;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+            return line;
+        }
+
+        //新增管理员
+        public int SaveAdmin(Admin admin) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //往数据库中新增管理员
+            string cmdText = "insert into Admin(AdminName,Password) values (@AdminName, @Password);";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+            int line = cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            return line;
+        }
+
+        //判断管理员用户名是否被使用
+        public bool CheckAdminName(string AdminName) {
+            var conn = GetConnection();
+            conn.Open();
+
+            //查询是否存在同名管理员
+            string cmdText = "select Id from Admin where AdminName = @AdminName;";
+            var cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = AdminName;
+            SqlDataReader reader = cmd.ExecuteReader();
+            bool isUnique = !reader.HasRows;
+
+            reader.Close();
+            conn.Close();
+
+            return isUnique;
+        }
+
+        //Admin表操作end-------------------------------------------------------------------------
+
+
+       //Reply表操作start---------------------------------------------------------------------------
 
         //保存回复
         public int SaveReply(Reply reply) {
@@ -687,6 +711,7 @@ namespace MessageBoard1.DataAccessLayer {
             }
         }
 
+        //清除Message的新回复数，减少MyUser的新回复数
         public void ClearNewReply(int MsgId, string Username) {
             var conn = GetConnection();
             conn.Open();
