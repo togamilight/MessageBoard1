@@ -59,7 +59,7 @@ namespace MessageBoard1.Controllers
             return View("GetHistoryMessage", msgs);
         }
 
-        public ActionResult GetMessage(int MsgId ,string messge = "") {
+        public ActionResult GetMessage(int MsgId ,string message = "") {
             DataAccess dataAcc = new DataAccess();
             Message msg = dataAcc.GetMessage(MsgId);
             //更新留言和用户的最新回复数
@@ -67,7 +67,7 @@ namespace MessageBoard1.Controllers
             if (msg.IsPublic) {
                 return View("LookMessage", msg);
             }
-            ViewData["Message"] = messge;
+            ViewData["Message"] = message;
             return View("EditMessage", msg);
         }
 

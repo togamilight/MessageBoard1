@@ -25,36 +25,49 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //往数据库中新增用户
-            string cmdText = "insert into MyUser(Username,Password,PhoneNum,SignDate) values (@Username, @Password, @PhoneNum, @SignDate);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
-            cmd.Parameters.Add("@SignDate", SqlDbType.Date).Value = DateTime.Now.Date;   //获取当前日期
-            int line = cmd.ExecuteNonQuery();
+            try {
+                //往数据库中新增用户
+                string cmdText = "insert into MyUser(Username,Password,PhoneNum,SignDate) values (@Username, @Password, @PhoneNum, @SignDate);";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+                cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+                cmd.Parameters.Add("@SignDate", SqlDbType.Date).Value = DateTime.Now.Date;   //获取当前日期
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
 
-            conn.Close();  
 
-            return line;
         }
 
         //判断用户名是否被使用
         public bool CheckUsername(string Username) {
             var conn = GetConnection();
             conn.Open();
+            try {
+                //查询是否存在同名用户
+                string cmdText = "select Id from MyUser where Username = @Username;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = Username;
+                SqlDataReader reader = cmd.ExecuteReader();
+                bool isUnique = !reader.HasRows;
+                reader.Close();
+                return isUnique;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
 
-            //查询是否存在同名用户
-            string cmdText = "select Id from MyUser where Username = @Username;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = Username;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool isUnique = !reader.HasRows;
 
-            reader.Close();
-            conn.Close();
-
-            return isUnique;
         }
 
         //判断用户名密码是否正确
@@ -62,18 +75,23 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询是否存在该用户名和密码
-            string cmdText = "select Id from MyUser where Username = @Username and Password = @Password;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool result = reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return result;
+            try {
+                //查询是否存在该用户名和密码
+                string cmdText = "select Id from MyUser where Username = @Username and Password = @Password;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+                SqlDataReader reader = cmd.ExecuteReader();
+                bool result = reader.HasRows;
+                reader.Close();
+                return result;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //通过用户名获取所有用户能修改的信息和新回复数，不包括密码(现在只有电话号码)
@@ -81,22 +99,28 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //根据用户名查询信息
-            string cmdText = "select PhoneNum,NewReply from MyUser where Username=@Username;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-            SqlDataReader reader = cmd.ExecuteReader();
-            MyUser user = new MyUser();
-            while (reader.Read()) {
-                user.PhoneNum = reader.GetString(0);
-                user.NewReply = reader.GetInt32(1);
+            try {
+                //根据用户名查询信息
+                string cmdText = "select PhoneNum,NewReply from MyUser where Username=@Username;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+                SqlDataReader reader = cmd.ExecuteReader();
+                MyUser user = new MyUser();
+                while (reader.Read()) {
+                    user.PhoneNum = reader.GetString(0);
+                    user.NewReply = reader.GetInt32(1);
+                }
+                user.Username = username;
+                reader.Close();
+                return user;
             }
-            user.Username = username;
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
 
-            reader.Close();
-            conn.Close();
-
-            return user;
         }
 
         //修改用户信息
@@ -104,15 +128,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改（手机号码）
-            string cmdText = "update MyUser set PhoneNum = @PhoneNum where Username = @Username;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-            return line;
+            try {
+                //修改（手机号码）
+                string cmdText = "update MyUser set PhoneNum = @PhoneNum where Username = @Username;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+                cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //修改用户密码
@@ -120,15 +150,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改
-            string cmdText = "update MyUser set Password = @Password where Username = @Username;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-            return line;
+            try {
+                //修改
+                string cmdText = "update MyUser set Password = @Password where Username = @Username;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //从reader中读取User数据组成List
@@ -159,16 +195,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询所有MyUser
-            string cmdText = "select * from MyUser;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var users = GetUserList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return users;
+            try {
+                //查询所有MyUser
+                string cmdText = "select * from MyUser;";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var users = GetUserList(reader);
+                reader.Close();
+                return users;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //搜索用户
@@ -176,16 +217,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //根据关键词查询用户查询
-            string cmdText = "select * from MyUser where Username like '%" + keyWord + "%';";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var users = GetUserList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return users;
+            try {
+                //根据关键词查询用户查询
+                string cmdText = "select * from MyUser where Username like '%" + keyWord + "%';";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var users = GetUserList(reader);
+                reader.Close();
+                return users;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //删除用户
@@ -193,15 +239,20 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //删除用户
-            string cmdText = "delete from MyUser where Username=@Username;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //删除用户
+                string cmdText = "delete from MyUser where Username=@Username;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
 
             //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
             ////开启一个事务
@@ -243,18 +294,23 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改
-            string cmdText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
-            cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //修改
+                string cmdText = "update MyUser set Username = @Username, Password = @Password, PhoneNum = @PhoneNum where Id = @Id;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = user.Username;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = user.Password;
+                cmd.Parameters.Add("@PhoneNum", SqlDbType.NVarChar).Value = user.PhoneNum;
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = user.Id;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
 
             //在数据库中加入了级联更新和级联删除，就不需要下面的开启事务了
 
@@ -302,19 +358,23 @@ namespace MessageBoard1.DataAccessLayer {
         public int SaveMessage(Message msg) {
             var conn = GetConnection();
             conn.Open();
-
-            //往数据库中新增留言
-            string cmdText = "insert into Message(Username,Title,Content,DateTime) values (@Username, @Title, @Content, @DateTime);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = msg.Username;
-            cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
-            cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
-            cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;   
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //往数据库中新增留言
+                string cmdText = "insert into Message(Username,Title,Content,DateTime) values (@Username, @Title, @Content, @DateTime);";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = msg.Username;
+                cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
+                cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
+                cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //从reader中读取Message除Content外的数据组成List
@@ -349,16 +409,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询所有留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
+            try {
+                //查询所有留言, 并排序
+                string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message order by DateTime desc;";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var msgs = GetMsgTitleList(reader);
+                reader.Close();
+                return msgs;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //获取所有公开留言的标题信息
@@ -366,16 +431,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询所有公开留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where IsPublic=1 order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
+            try {
+                //查询所有公开留言, 并排序
+                string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where IsPublic=1 order by DateTime desc;";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var msgs = GetMsgTitleList(reader);
+                reader.Close();
+                return msgs;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //查询用户所有留言信息，组成List
@@ -383,17 +453,22 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询用户所有留言, 并排序
-            string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where Username = @Username order by IsPublic, DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
-
-            reader.Close();
-            conn.Close();
-
-            return msgs;
+            try {
+                //查询用户所有留言, 并排序
+                string cmdText = "select Id, Username, Title, IsPublic, DateTime, ReplyNum, NewReply from Message where Username = @Username order by IsPublic, DateTime desc;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Username", SqlDbType.NVarChar).Value = username;
+                SqlDataReader reader = cmd.ExecuteReader();
+                var msgs = GetMsgTitleList(reader);
+                reader.Close();
+                return msgs;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //删除留言
@@ -478,50 +553,56 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询留言
-            string cmdText = "select * from Message where Id = @Id;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = Id;
-            SqlDataReader reader = cmd.ExecuteReader();
-            Message msg = new Message();
-            while (reader.Read()) {
-                msg.Id = (int)reader["Id"];
-                msg.Username = (string)reader["Username"];
-                msg.Title = (string)reader["Title"];
-                msg.Content = (string)reader["Content"];
-                msg.IsPublic = (bool)reader["IsPublic"];
-                msg.DateTime = (DateTime)reader["DateTime"];
-                msg.ReplyNum = (int)reader["ReplyNum"];
-                msg.NewReply = (int)reader["NewReply"];
-            }
-            reader.Close();
+            try {
+                //查询留言
+                string cmdText = "select * from Message where Id = @Id;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = Id;
+                SqlDataReader reader = cmd.ExecuteReader();
+                Message msg = new Message();
+                while (reader.Read()) {
+                    msg.Id = (int)reader["Id"];
+                    msg.Username = (string)reader["Username"];
+                    msg.Title = (string)reader["Title"];
+                    msg.Content = (string)reader["Content"];
+                    msg.IsPublic = (bool)reader["IsPublic"];
+                    msg.DateTime = (DateTime)reader["DateTime"];
+                    msg.ReplyNum = (int)reader["ReplyNum"];
+                    msg.NewReply = (int)reader["NewReply"];
+                }
+                reader.Close();
 
-            //查询留言对应的所有回复
-            string cmdText1 = "select * from Reply where MessageId = @MessageId;";
-            var cmd1 = new SqlCommand(cmdText1, conn);
-            cmd1.Parameters.Add("@MessageId", SqlDbType.Int).Value = Id;
-            List<Reply> replies = new List<Reply>();
-            SqlDataReader reader1 = cmd1.ExecuteReader();
-            int c1 = reader1.GetOrdinal("Id");
-            int c2 = reader1.GetOrdinal("MessageId");
-            int c3 = reader1.GetOrdinal("AdminName");
-            int c4 = reader1.GetOrdinal("Content");
-            int c5 = reader1.GetOrdinal("DateTime");
-            while (reader1.Read()) {
-                Reply reply = new Reply() {
-                    Id = (int)reader1[c1],
-                    MessageId = (int)reader1[c2],
-                    AdminName = (string)reader1[c3],
-                    Content = (string)reader1[c4],
-                    DateTime = (DateTime)reader1[c5]
-                };
-                replies.Add(reply);
+                //查询留言对应的所有回复
+                string cmdText1 = "select * from Reply where MessageId = @MessageId;";
+                var cmd1 = new SqlCommand(cmdText1, conn);
+                cmd1.Parameters.Add("@MessageId", SqlDbType.Int).Value = Id;
+                List<Reply> replies = new List<Reply>();
+                SqlDataReader reader1 = cmd1.ExecuteReader();
+                int c1 = reader1.GetOrdinal("Id");
+                int c2 = reader1.GetOrdinal("MessageId");
+                int c3 = reader1.GetOrdinal("AdminName");
+                int c4 = reader1.GetOrdinal("Content");
+                int c5 = reader1.GetOrdinal("DateTime");
+                while (reader1.Read()) {
+                    Reply reply = new Reply() {
+                        Id = (int)reader1[c1],
+                        MessageId = (int)reader1[c2],
+                        AdminName = (string)reader1[c3],
+                        Content = (string)reader1[c4],
+                        DateTime = (DateTime)reader1[c5]
+                    };
+                    replies.Add(reply);
+                }
+                reader1.Close();
+                msg.Replies = replies;
+                return msg;
             }
-            reader1.Close();
-            conn.Close();
-
-            msg.Replies = replies;
-            return msg;
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //修改留言
@@ -529,17 +610,22 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改留言
-            string cmdText = "update Message set Title = @Title, Content = @Content where Id = @Id";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = msg.Id;
-            cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
-            cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //修改留言
+                string cmdText = "update Message set Title = @Title, Content = @Content where Id = @Id";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = msg.Id;
+                cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = msg.Title;
+                cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = msg.Content;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //切换留言公开状态
@@ -547,15 +633,20 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //切换公开状态
-            string cmdText = "update Message set IsPublic = (case when IsPublic=1 then 0 else 1 end) where Id = @Id;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = MsgId;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //切换公开状态
+                string cmdText = "update Message set IsPublic = (case when IsPublic=1 then 0 else 1 end) where Id = @Id;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = MsgId;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //搜索留言
@@ -563,16 +654,22 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //根据关键词查询留言
-            string cmdText = "select * from Message where Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%' order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
+            try {
+                //根据关键词查询留言
+                string cmdText = "select * from Message where Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%' order by DateTime desc;";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var msgs = GetMsgTitleList(reader);
 
-            reader.Close();
-            conn.Close();
-
-            return msgs;
+                reader.Close();
+                return msgs;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //搜索公开留言
@@ -580,16 +677,22 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //根据关键词查询留言
-            string cmdText = "select * from Message where (Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%') and IsPublic=1 order by DateTime desc;";
-            var cmd = new SqlCommand(cmdText, conn);
-            SqlDataReader reader = cmd.ExecuteReader();
-            var msgs = GetMsgTitleList(reader);
+            try {
+                //根据关键词查询留言
+                string cmdText = "select * from Message where (Title like '%" + keyWord + "%' or Content like '%" + keyWord + "%') and IsPublic=1 order by DateTime desc;";
+                var cmd = new SqlCommand(cmdText, conn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                var msgs = GetMsgTitleList(reader);
 
-            reader.Close();
-            conn.Close();
-
-            return msgs;
+                reader.Close();
+                return msgs;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //Message表操作end-------------------------------------------------------------------------
@@ -603,18 +706,23 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询是否存在该管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName and Password = @Password;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool result = reader.HasRows;
-
-            reader.Close();
-            conn.Close();
-
-            return result;
+            try {
+                //查询是否存在该管理员
+                string cmdText = "select Id from Admin where AdminName = @AdminName and Password = @Password;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+                SqlDataReader reader = cmd.ExecuteReader();
+                bool result = reader.HasRows;
+                reader.Close();
+                return result;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //修改管理员密码
@@ -622,15 +730,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //修改
-            string cmdText = "update Admin set Password = @Password where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-            return line;
+            try {
+                //修改
+                string cmdText = "update Admin set Password = @Password where AdminName = @AdminName;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //新增管理员
@@ -638,16 +752,21 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //往数据库中新增管理员
-            string cmdText = "insert into Admin(AdminName,Password) values (@AdminName, @Password);";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
-            cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
-            int line = cmd.ExecuteNonQuery();
-
-            conn.Close();
-
-            return line;
+            try {
+                //往数据库中新增管理员
+                string cmdText = "insert into Admin(AdminName,Password) values (@AdminName, @Password);";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = admin.AdminName;
+                cmd.Parameters.Add("@Password", SqlDbType.NVarChar).Value = admin.Password;
+                int line = cmd.ExecuteNonQuery();
+                return line;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //判断管理员用户名是否被使用
@@ -655,23 +774,29 @@ namespace MessageBoard1.DataAccessLayer {
             var conn = GetConnection();
             conn.Open();
 
-            //查询是否存在同名管理员
-            string cmdText = "select Id from Admin where AdminName = @AdminName;";
-            var cmd = new SqlCommand(cmdText, conn);
-            cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = AdminName;
-            SqlDataReader reader = cmd.ExecuteReader();
-            bool isUnique = !reader.HasRows;
+            try {
+                //查询是否存在同名管理员
+                string cmdText = "select Id from Admin where AdminName = @AdminName;";
+                var cmd = new SqlCommand(cmdText, conn);
+                cmd.Parameters.Add("@AdminName", SqlDbType.NVarChar).Value = AdminName;
+                SqlDataReader reader = cmd.ExecuteReader();
+                bool isUnique = !reader.HasRows;
 
-            reader.Close();
-            conn.Close();
-
-            return isUnique;
+                reader.Close();
+                return isUnique;
+            }
+            catch (Exception) {
+                throw;
+            }
+            finally {
+                conn.Close();
+            }
         }
 
         //Admin表操作end-------------------------------------------------------------------------
 
 
-       //Reply表操作start---------------------------------------------------------------------------
+        //Reply表操作start---------------------------------------------------------------------------
 
         //保存回复
         public int SaveReply(Reply reply) {
