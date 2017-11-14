@@ -18,7 +18,7 @@ namespace MessageBoard1.DataAccessLayer {
             return new SqlConnection(connStr);
         }
 
-        //MyUser表操作start-------------------------------------------------------------------------------
+        # region MyUser表操作
 
         //新增用户
         public int SaveUser(MyUser user) {
@@ -347,12 +347,12 @@ namespace MessageBoard1.DataAccessLayer {
             //}
         }
 
-        //MyUser表操作end-----------------------------------------------------------------------------
+        #endregion
 
 
 
 
-        //Message表操作start-------------------------------------------------------------------------
+        #region Message表操作
 
         //保存用户写的新留言
         public int SaveMessage(Message msg) {
@@ -695,11 +695,11 @@ namespace MessageBoard1.DataAccessLayer {
             }
         }
 
-        //Message表操作end-------------------------------------------------------------------------
+        #endregion
 
 
 
-        //Admin表操作start-------------------------------------------------------------------------
+        #region Admin表操作
 
         //判断管理员的用户名密码是否正确
         public bool CheckAdmin(Admin admin) {
@@ -793,10 +793,10 @@ namespace MessageBoard1.DataAccessLayer {
             }
         }
 
-        //Admin表操作end-------------------------------------------------------------------------
+        #endregion
 
 
-        //Reply表操作start---------------------------------------------------------------------------
+        #region Reply表操作
 
         //保存回复
         public int SaveReply(Reply reply) {
@@ -867,5 +867,7 @@ namespace MessageBoard1.DataAccessLayer {
                 conn.Close();
             }
         }
+
+        #endregion
     }
 }
