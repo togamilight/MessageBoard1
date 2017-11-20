@@ -482,10 +482,11 @@ namespace MessageBoard1.DataAccessLayer {
             cmd.Connection = conn;
             cmd.Transaction = trans;
             try {
-                //更新用户的新回复数（减去要删除的留言的新回复数）
-                cmd.CommandText = "update MyUser set NewReply = NewReply - (select NewReply from Message where Id = @MsgId) where Username in (select Username from Message where Id = @MsgId);";
-                cmd.Parameters.Add("@MsgId", SqlDbType.Int).Value = MsgId;
-                cmd.ExecuteNonQuery();
+                //已在数据库写好触发器，不需要在这里更新了
+                ////更新用户的新回复数（减去要删除的留言的新回复数）
+                //cmd.CommandText = "update MyUser set NewReply = NewReply - (select NewReply from Message where Id = @MsgId) where Username in (select Username from Message where Id = @MsgId);";
+                //cmd.Parameters.Add("@MsgId", SqlDbType.Int).Value = MsgId;
+                //cmd.ExecuteNonQuery();
                 //删除这个留言 
                 cmd.CommandText = "delete from Message where Id = @MsgId;";
                 int line = cmd.ExecuteNonQuery();
@@ -816,11 +817,12 @@ namespace MessageBoard1.DataAccessLayer {
                 cmd.Parameters.Add("@Content", SqlDbType.NVarChar).Value = reply.Content;
                 cmd.Parameters.Add("@DateTime", SqlDbType.DateTime).Value = DateTime.Now;
                 int line = cmd.ExecuteNonQuery();
-                //更新回复数
-                cmd.CommandText = "update Message set ReplyNum=ReplyNum+1, NewReply=NewReply+1 where Id=@MessageId;";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "update MyUser set NewReply=NewReply+1 where Username in (select Username from Message where Id=@MessageId);";
-                cmd.ExecuteNonQuery();
+                //已在数据库写好触发器，不需要在这里更新了
+                ////更新回复数
+                //cmd.CommandText = "update Message set ReplyNum=ReplyNum+1, NewReply=NewReply+1 where Id=@MessageId;";
+                //cmd.ExecuteNonQuery();
+                //cmd.CommandText = "update MyUser set NewReply=NewReply+1 where Username in (select Username from Message where Id=@MessageId);";
+                //cmd.ExecuteNonQuery();
                 //提交事务
                 trans.Commit();
 
